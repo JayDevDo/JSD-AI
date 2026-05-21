@@ -1,0 +1,28 @@
+{
+	"systemSettings": {
+		"sysFileLocation": "default-JSD.json",
+		"maxTabs": 13,
+		"maxPins": 9,
+		"minRows": 3,
+		"maxRows": 6,
+		"minCols": 3,
+		"maxCols": 6,
+		"themeOptions": ["dark", "light", "custom"],
+		"contrastLimits": [3.5, 21],
+		"minLabelLen": 3,
+		"maxTabLabelLen": 8,
+		"maxDialLabelLen": 16
+	},
+	"userSettings": {
+		"contrastLevel": [4.5, 7],
+		"theme": "dark",
+		"view": "vView",
+		"activeTabId": "WORK"
+	},
+	"allTabs": [
+		{"tabId": "ARCHIVE", "rows": 4, "cols": 6, "bgColor": "#000000", "txtColor": "#FFFFFF", "order": 0},
+		{"tabId": "WORK", "rows": 4, "cols": 6, "bgColor": "#0FF000", "txtColor": "#000000", "order": 1},
+		{"tabId": "HOME", "rows": 3, "cols": 3, "bgColor": "#FFF000", "txtColor": "#000000", "order": 2}
+	],
+	"allDials": []
+}
