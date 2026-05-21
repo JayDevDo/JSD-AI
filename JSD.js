@@ -4,6 +4,8 @@
 */
 "use strict";
 //==============================================================================
+const homePageUrl = "https://jaydevdo.github.io/JSD-AI/";
+//==============================================================================
 const getElm = (elmId) => document.getElementById(elmId);
 //==============================================================================
 const clearElm = (elm) => {
@@ -82,9 +84,12 @@ const setView = (view) => {
 //==============================================================================
 const updNavHome = (tab) => {
 	getElm("navHome").textContent = tab.tabId;
-	getElm("navHome").style.background = tab.bgColor;
-	getElm("navHome").style.color = tab.txtColor;
-	getElm("navHome").style.borderColor = tab.txtColor;
+	getElm("navHome").style.color = "#66CCFF";
+	getElm("navHome").style.borderColor = "#66CCFF";
+};
+//==============================================================================
+const openHome = () => {
+	window.open(homePageUrl, "_blank");
 };
 //==============================================================================
 const togView = () => {
@@ -207,7 +212,7 @@ const renderApp = () => {
 };
 //==============================================================================
 const wireHome = () => {
-	getElm("navHome").addEventListener("click", togView);
+	getElm("navHome").addEventListener("click", openHome);
 	getElm("toggleBtn").addEventListener("click", togView);
 	getElm("addTabBtn").addEventListener("click", () => openTabDialog());
 };
