@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>JSD</title>
+	<style id="scaffold">
+		html, body {
+			margin: 0;
+			height: 100%;
+		}
+		#app {
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+		}
+		#app.vView {
+			display: grid;
+			grid-template-columns: 12% 88%;
+			grid-template-rows: 1fr min-content;
+			grid-template-areas:
+				"tabs grid"
+				"bttns grid";
+		}
+		#app.hView {
+			display: grid;
+			grid-template-columns: 1fr min-content;
+			grid-template-rows: 10% 90%;
+			grid-template-areas:
+				"tabs bttns"
+				"grid grid";
+		}
+		#navHome {
+			background: #222222;
+			color: #ffffff;
+			border: 1px solid #444444;
+		}
+		#navTabs {
+			grid-area: tabs;
+			display: grid;
+			min-width: 0;
+			min-height: 0;
+		}
+		#dialGrid {
+			grid-area: grid;
+			display: grid;
+			gap: 4px;
+			padding: 4px;
+			box-sizing: border-box;
+			min-width: 0;
+			min-height: 0;
+		}
+		#navBttns {
+			grid-area: bttns;
+			display: grid;
+			gap: 4px;
+			padding: 5px;
+			box-sizing: border-box;
+			z-index: 30;
+		}
+		.tab {
+			padding: 2px 0;
+			white-space: nowrap;
+			display: grid;
+			grid-template-columns: min-content 1fr;
+			align-items: stretch;
+			cursor: pointer;
+			box-sizing: border-box;
+			min-width: 0;
+			min-height: 0;
+		}
+		#navHome {
+			grid-template-columns: 1fr;
+			place-items: center;
+		}
+		.tab.active {
+			outline: 2px solid #ffffff;
+		}
+		.tabMenu, .tabName {
+			display: grid;
+			align-items: center;
+			border: 0;
+			background: transparent;
+			color: inherit;
+			cursor: pointer;
+			min-width: 0;
+		}
+		.tabMenu {
+			justify-items: start;
+			padding: 2px 4px;
+			order: 1;
+		}
+		.tabName {
+			justify-items: end;
+			padding: 2px 4px;
+			order: 2;
+		}
+		.dial, .addDial {
+			display: grid;
+			place-items: center;
+			min-width: 0;
+			min-height: 0;
+			border: 1px solid #444444;
+			cursor: pointer;
+			overflow: hidden;
+		}
+		.dial {
+			position: relative;
+		}
+		.dialName {
+			width: 100%;
+			height: 100%;
+			border: 0;
+			background: transparent;
+			color: inherit;
+			cursor: pointer;
+			font-size: 1.1em;
+		}
+		.dialMenu {
+			position: absolute;
+			left: 2px;
+			bottom: 2px;
+			border: 1px solid #444444;
+			background: rgba(0, 0, 0, 0.55);
+			color: inherit;
+			cursor: pointer;
+			padding: 1px 4px;
+		}
+		.dialPin {
+			position: absolute;
+			top: 3px;
+			right: 3px;
+			width: 14px;
+			height: 12px;
+			border: 1px solid #444444;
+			pointer-events: none;
+			padding: 0;
+		}
+		.dialPin::before {
+			content: "";
+			position: absolute;
+			left: 3px;
+			top: -7px;
+			width: 6px;
+			height: 7px;
+			border: 2px solid currentColor;
+			border-bottom: 0;
+			border-radius: 5px 5px 0 0;
+		}
+		.dialPin::after {
+			content: "";
+			position: absolute;
+			left: 6px;
+			top: 4px;
+			width: 2px;
+			height: 4px;
+			background: currentColor;
+		}
+		#app.vView #navTabs {
+			grid-template-columns: 1fr;
+			grid-auto-rows: 1fr;
+			overflow-y: auto;
+		}
+		#app.vView #navBttns {
+			grid-auto-flow: row;
+			grid-auto-rows: min-content;
+		}
+		#app.hView #navTabs {
+			grid-template-rows: 1fr;
+			grid-auto-flow: column;
+			grid-auto-columns: 1fr;
+			overflow-x: auto;
+		}
+		#app.hView .tab {
+			padding: 1px 6px;
+			grid-template-columns: 1fr min-content;
+		}
+		#app.hView .tabMenu {
+			justify-items: end;
+			order: 2;
+		}
+		#app.hView .tabName {
+			justify-items: start;
+			padding: 2px 12px 2px 6px;
+			order: 1;
+		}
+		#app.hView #navBttns {
+			grid-auto-flow: column;
+			grid-auto-columns: min-content;
+			align-content: start;
+		}
+		#toggleBtn, #addTabBtn {
+			padding: 2px 6px;
+		}
+		#blockScreen {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: #000000;
+			text-align: center;
+			padding-top: 20%;
+		}
+		#tabDlg, #dialDlg {
+			position: fixed;
+			inset: 0;
+			display: grid;
+			place-items: start center;
+			padding-top: 20vh;
+			background: rgba(0, 0, 0, 0.35);
+			z-index: 999;
+			box-sizing: border-box;
+		}
+		#tabDlg[hidden], #dialDlg[hidden] {
+			display: none;
+		}
+		#tabDlg, #tabDlg *, #dialDlg, #dialDlg * {
+			box-sizing: border-box;
+			font: inherit;
+		}
+		#tabDlgPanel, #dialDlgPanel {
+			display: grid;
+			grid-template-columns: auto 1fr;
+			grid-auto-rows: min-content;
+			gap: 4px;
+			padding: 10px;
+			border: 1px solid #444444;
+			background: #222222;
+			color: #ffffff;
+			min-width: 260px;
+		}
+		#tabDlgPanel h2, #dialDlgPanel h2 {
+			grid-column: 1 / -1;
+			margin: 0 0 6px 0;
+		}
+		.dialogRow {
+			display: contents;
+		}
+		.dialogRow label {
+			display: grid;
+			align-items: center;
+			padding-right: 6px;
+		}
+		.dialogRow input, .dialogRow select {
+			width: 100%;
+			min-width: 0;
+		}
+		.dialogRow input[type="checkbox"] {
+			width: auto;
+		}
+		.dialogActions {
+			grid-column: 1 / -1;
+			display: grid;
+			grid-auto-flow: column;
+			grid-auto-columns: min-content;
+			justify-content: end;
+			gap: 4px;
+			margin-top: 6px;
+		}
+		.delRow label {
+			color: #ff9999;
+		}
+		#tabDelBtn, #dialDelBtn {
+			border-color: #aa3333;
+			color: #ff9999;
+		}
+		#tabDelBtn[hidden], #dialDelBtn[hidden] {
+			display: none;
+		}
+		#tabDlg button, #tabDlg input, #tabDlg select,
+		#dialDlg button, #dialDlg input, #dialDlg select {
+			margin: 0;
+			border: 1px solid #555555;
+			background: #111111;
+			color: #ffffff;
+			padding: 2px 6px;
+		}
+		#tabDlg input[type="color"], #dialDlg input[type="color"] {
+			appearance: auto;
+			background: transparent;
+			color: initial;
+			padding: 0;
+			width: 44px;
+			height: 24px;
+		}
+		#tabDlg button, #dialDlg button {
+			cursor: pointer;
+		}
+	</style>
+	<script defer src="fctr_LclStrg.js"></script>
+	<script defer src="fctr_Archive.js"></script>
+	<script defer src="dlg_Tab.js"></script>
+	<script defer src="dlg_Dial.js"></script>
+	<script defer src="JSD.js"></script>
+</head>
+<body>
+	<div id="app" class="vView">
+		<div id="navHome" class="tab"></div>
+		<div id="navTabs"></div>
+		<div id="dialGrid"></div>
+		<div id="navBttns">
+			<button id="addTabBtn">+Tab</button>
+			<button id="toggleBtn">Toggle</button>
+		</div>
+	</div>
+</body>
+</html>
