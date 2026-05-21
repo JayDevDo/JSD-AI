@@ -7,22 +7,93 @@
 		"maxRows": 6,
 		"minCols": 3,
 		"maxCols": 6,
-		"themeOptions": ["dark", "light", "custom"],
-		"contrastLimits": [3.5, 21],
+		"themeOptions": [
+			"dark",
+			"light",
+			"custom"
+		],
+		"contrastLimits": [
+			3.5,
+			21
+		],
 		"minLabelLen": 3,
 		"maxTabLabelLen": 8,
 		"maxDialLabelLen": 16
 	},
 	"userSettings": {
-		"contrastLevel": [4.5, 7],
+		"contrastLevel": [
+			4.5,
+			7
+		],
 		"theme": "dark",
 		"view": "vView",
 		"activeTabId": "WORK"
 	},
 	"allTabs": [
-		{"tabId": "ARCHIVE", "rows": 4, "cols": 6, "bgColor": "#000000", "txtColor": "#FFFFFF", "order": 0},
-		{"tabId": "WORK", "rows": 4, "cols": 6, "bgColor": "#0FF000", "txtColor": "#000000", "order": 1},
-		{"tabId": "HOME", "rows": 3, "cols": 3, "bgColor": "#FFF000", "txtColor": "#000000", "order": 2}
+		{
+			"tabId": "ARCHIVE",
+			"rows": 4,
+			"cols": 6,
+			"bgColor": "#000000",
+			"txtColor": "#FFFFFF",
+			"order": 0
+		},
+		{
+			"tabId": "WORK",
+			"rows": 4,
+			"cols": 6,
+			"bgColor": "#0FF000",
+			"txtColor": "#000000",
+			"order": 1
+		},
+		{
+			"tabId": "HOME",
+			"rows": 3,
+			"cols": 3,
+			"bgColor": "#FFF000",
+			"txtColor": "#000000",
+			"order": 2
+		}
 	],
-	"allDials": []
+	"allDials": [
+		{
+			"label": "Github Repo Home",
+			"url": "https://github.com/JayDevDo/JSD",
+			"bgColor": "#FF7800",
+			"txtColor": "#000000",
+			"position": {
+				"tabId": "WORK",
+				"row": 0,
+				"col": 0
+			},
+			"pinned": false,
+			"lastClicked": ""
+		},
+		{
+			"label": "Github Pages",
+			"url": "https://jaydevdo.github.io/JSD/index.html",
+			"bgColor": "#F07800",
+			"txtColor": "#000F00",
+			"position": {
+				"tabId": "WORK",
+				"row": 1,
+				"col": 0
+			},
+			"pinned": true,
+			"lastClicked": ""
+		},
+		{
+			"label": "search DDG",
+			"url": "https://duckduckgo.com/?q=entersearchstringhere&df=y&ia=web",
+			"bgColor": "#000000",
+			"txtColor": "#FFFFFF",
+			"position": {
+				"tabId": "HOME",
+				"row": 0,
+				"col": 1
+			},
+			"pinned": false,
+			"lastClicked": ""
+		}
+	]
 }
