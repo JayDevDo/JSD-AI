@@ -42,15 +42,15 @@
 			"tabId": "WORK",
 			"rows": 4,
 			"cols": 6,
-			"bgColor": "#0FF000",
-			"txtColor": "#000000",
+			"bgColor": "#1F3A5F",
+			"txtColor": "#F6D365",
 			"order": 1
 		},
 		{
 			"tabId": "HOME",
 			"rows": 3,
 			"cols": 3,
-			"bgColor": "#FFF000",
+			"bgColor": "#B7E4C7",
 			"txtColor": "#000000",
 			"order": 2
 		}
