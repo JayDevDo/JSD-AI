@@ -108,7 +108,7 @@ tabs top
 dial grid below
 ```
 
-The `navHome` item acts as the first tab-like control. It shows the active tab name and uses the active tab colors. Clicking it toggles between vertical and horizontal view.
+The `navHome` item opens the GitHub Pages site for this repository.
 
 ## Dialogs
 

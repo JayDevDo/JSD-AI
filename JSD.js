@@ -79,6 +79,7 @@ const updAddBtn = () => {
 const setView = (view) => {
 	getElm("app").classList.remove("vView", "hView");
 	getElm("app").classList.add(view);
+	getElm("toggleBtn").textContent = view === "vView" ? "tabs on top" : "tabs left";
 	JSDStore.saveUsr({ view: view });
 };
 //==============================================================================
@@ -215,6 +216,7 @@ const wireHome = () => {
 	getElm("navHome").addEventListener("click", openHome);
 	getElm("toggleBtn").addEventListener("click", togView);
 	getElm("addTabBtn").addEventListener("click", () => openTabDialog());
+	getElm("jsonBtn").addEventListener("click", () => openJsonDialog());
 };
 //==============================================================================
 const initApp = async () => {

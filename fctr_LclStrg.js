@@ -109,9 +109,24 @@ const samePos = (posA, posB) => posA.tabId === posB.tabId && posA.row === posB.r
 //==============================================================================
 const sameCell = (posA, posB) => posA.row === posB.row && posA.col === posB.col;
 //==============================================================================
+const skipPosMatch = (dialPos, skipPos) => {
+	if (!skipPos) {
+		return false;
+	}
+	if (Array.isArray(skipPos)) {
+		for (const pos of skipPos) {
+			if (samePos(dialPos, pos)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	return samePos(dialPos, skipPos);
+};
+//==============================================================================
 const posTaken = (pos, skipPos = null, pinPos = null) => {
 	for (const dial of appData.allDials) {
-		if (skipPos && samePos(dial.position, skipPos)) {
+		if (skipPosMatch(dial.position, skipPos)) {
 			continue;
 		}
 		if (samePos(dial.position, pos)) {
@@ -206,10 +221,31 @@ const freeSlots = (tabId, skipPos = null, rows = null, cols = null, pinPos = nul
 	return slots;
 };
 //==============================================================================
+const posDist = (posA, posB) => Math.abs(posA.row - posB.row) + Math.abs(posA.col - posB.col);
+//==============================================================================
+const sortByDist = (slots, fromPos) => {
+	return slots.slice().sort((posA, posB) => {
+		const distA = posDist(posA, fromPos);
+		const distB = posDist(posB, fromPos);
+		if (distA !== distB) {
+			return distA - distB;
+		}
+		if (posA.row !== posB.row) {
+			return posA.row - posB.row;
+		}
+		return posA.col - posB.col;
+	});
+};
+//==============================================================================
 const tabHasFree = (tabId, skipPos = null) => freeSlots(tabId, skipPos).length > 0;
 //==============================================================================
 const freePos = (tabId, skipPos = null, rows = null, cols = null, pinPos = null) => {
 	const slots = freeSlots(tabId, skipPos, rows, cols, pinPos);
+	return slots.length ? slots[0] : null;
+};
+//==============================================================================
+const freePosClosest = (tabId, fromPos, skipPos = null, rows = null, cols = null, pinPos = null) => {
+	const slots = sortByDist(freeSlots(tabId, skipPos, rows, cols, pinPos), fromPos);
 	return slots.length ? slots[0] : null;
 };
 //==============================================================================
@@ -238,49 +274,97 @@ const setTabOrd = (tabId, order) => {
 	}
 };
 //==============================================================================
+const sharedGrid = () => {
+	let rows = null;
+	let cols = null;
+	for (const tab of usrTabs()) {
+		rows = rows === null ? tab.rows : Math.min(rows, tab.rows);
+		cols = cols === null ? tab.cols : Math.min(cols, tab.cols);
+	}
+	return { rows: rows || 0, cols: cols || 0 };
+};
+//==============================================================================
+const pinCellUsed = (pos, oldPos = null) => {
+	for (const dial of appData.allDials) {
+		if (oldPos && samePos(dial.position, oldPos)) {
+			continue;
+		}
+		if (dial.pinned && sameCell(dial.position, pos)) {
+			return true;
+		}
+	}
+	return false;
+};
+//==============================================================================
+const pinSlots = (fromPos, oldPos = null) => {
+	const grid = sharedGrid();
+	const slots = [];
+	for (let row = 0; row < grid.rows; row++) {
+		for (let col = 0; col < grid.cols; col++) {
+			const pos = makePos(fromPos.tabId, row, col);
+			if (!pinCellUsed(pos, oldPos)) {
+				slots.push(pos);
+			}
+		}
+	}
+	return sortByDist(slots, fromPos);
+};
+//==============================================================================
+const pinTargetFor = (fromPos, oldPos = null) => {
+	const grid = sharedGrid();
+	if (fromPos.tabId === archTabId || fromPos.row >= grid.rows || fromPos.col >= grid.cols) {
+		return null;
+	}
+	if (pinCellUsed(fromPos, oldPos)) {
+		return null;
+	}
+	return fromPos;
+};
+//==============================================================================
+const pinMovePlan = (dial, oldPos = null) => {
+	const res = { ok: true, mssgs: [], moves: [] };
+	if (!pinTargetFor(dial.position, oldPos)) {
+		return { ok: false, mssgs: ["Selected position is outside the shared pin grid or already pinned"], moves: [] };
+	}
+	for (const tab of usrTabs()) {
+		const pos = makePos(tab.tabId, dial.position.row, dial.position.col);
+		const oldDial = dialAt(pos);
+		const toPos = freePosClosest(tab.tabId, pos, [pos, oldPos].filter(Boolean), null, null, dial.position);
+		if (!toPos) {
+			return { ok: false, mssgs: ["Cannot pin, no free slot on tab: " + tab.tabId], moves: [] };
+		}
+		if (!oldDial || oldDial.pinned || (oldPos && samePos(oldDial.position, oldPos))) {
+			continue;
+		}
+		res.moves.push({ from: cloneData(pos), to: cloneData(toPos), label: oldDial.label });
+		res.mssgs.push("Move " + oldDial.label + " on " + tab.tabId + " to r" + toPos.row + " c" + toPos.col);
+	}
+	return res;
+};
+//==============================================================================
 const pinOK = (dial, oldPos = null) => {
 	if (!dial.pinned) {
 		return { ok: true, mssgs: [] };
 	}
 	const oldDial = oldPos ? dialAt(oldPos) : null;
+	if (oldDial && oldDial.pinned && !samePos(oldPos, dial.position)) {
+		return { ok: false, mssgs: ["Pinned dial must be unpinned before moving"] };
+	}
 	if ((!oldDial || !oldDial.pinned) && getPins().length >= appData.systemSettings.maxPins) {
 		return { ok: false, mssgs: ["Max pinned dials reached"] };
 	}
-	for (const tab of usrTabs()) {
-		if (dial.position.row >= tab.rows || dial.position.col >= tab.cols) {
-			return { ok: false, mssgs: ["Pinned position does not exist on tab: " + tab.tabId] };
-		}
-	}
-	for (const oldDial of appData.allDials) {
-		if (oldPos && samePos(oldDial.position, oldPos)) {
-			continue;
-		}
-		if (oldDial.pinned && sameCell(oldDial.position, dial.position)) {
-			return { ok: false, mssgs: ["Position already used by pinned dial: " + oldDial.label] };
-		}
-	}
-	return { ok: true, mssgs: [] };
+	return pinMovePlan(dial, oldPos);
 };
 //==============================================================================
 const moveForPin = (dial, oldPos = null) => {
-	const res = { ok: true, mssgs: [] };
-	for (const tab of usrTabs()) {
-		if (tab.tabId === dial.position.tabId) {
-			continue;
-		}
-		const pos = makePos(tab.tabId, dial.position.row, dial.position.col);
-		const oldDial = dialAt(pos);
-		if (!oldDial || oldDial.pinned) {
-			continue;
-		}
-		const toPos = freePos(tab.tabId, pos, null, null, dial.position);
-		if (toPos) {
-			oldDial.position = toPos;
-			res.mssgs.push("Moved " + oldDial.label + " to " + toPos.tabId + " r" + toPos.row + " c" + toPos.col);
-			continue;
-		}
-		if (typeof JSDArch !== "undefined") {
-			res.mssgs = res.mssgs.concat(JSDArch.archDial(oldDial).mssgs);
+	const res = pinMovePlan(dial, oldPos);
+	if (!res.ok) {
+		return res;
+	}
+	for (const move of res.moves) {
+		const oldDial = dialAt(move.from);
+		if (oldDial) {
+			oldDial.position = cloneData(move.to);
 		}
 	}
 	return res;
@@ -292,7 +376,7 @@ const saveDial = (dial, oldPos = null) => {
 		return chk;
 	}
 	const res = { ok: true, mssgs: chk.mssgs };
-	if (oldPos && !samePos(oldPos, dial.position)) {
+	if (!dial.pinned && oldPos && !samePos(oldPos, dial.position)) {
 		if (posTaken(dial.position, oldPos)) {
 			return { ok: false, mssgs: ["Position is taken"] };
 		}
@@ -301,7 +385,11 @@ const saveDial = (dial, oldPos = null) => {
 	}
 	appData.allDials = appData.allDials.filter((oldDial) => !samePos(oldDial.position, oldPos || dial.position));
 	if (dial.pinned) {
-		res.mssgs = res.mssgs.concat(moveForPin(dial, oldPos).mssgs);
+		const moveRes = moveForPin(dial, oldPos);
+		if (!moveRes.ok) {
+			return moveRes;
+		}
+		res.mssgs = res.mssgs.concat(moveRes.mssgs);
 	}
 	appData.allDials.push(cloneData(dial));
 	saveData();
@@ -455,7 +543,40 @@ const exportJson = (pretty = true) => {
 	return JSON.stringify(appData);
 };
 //==============================================================================
+const replDials = (dials) => {
+	const oldDials = appData.allDials.length;
+	const res = { ok: true, mssgs: [] };
+	appData.allDials = [];
+	for (const dial of dials.filter((item) => !item.pinned)) {
+		const chk = saveDial(dial);
+		res.mssgs = res.mssgs.concat(chk.mssgs);
+	}
+	for (const dial of dials.filter((item) => item.pinned)) {
+		const chk = saveDial(dial);
+		res.mssgs = res.mssgs.concat(chk.mssgs);
+	}
+	saveData();
+	res.mssgs.unshift("dials replaced: " + oldDials + " -> " + appData.allDials.length);
+	return res;
+};
+//==============================================================================
+const replTabsDials = (tabs, dials) => {
+	const oldTabs = usrTabs().length;
+	const res = { ok: true, mssgs: [] };
+	appData.allTabs = cloneData(tabs);
+	res.mssgs = res.mssgs.concat(replDials(dials).mssgs);
+	if (!tabById(appData.userSettings.activeTabId)) {
+		appData.userSettings.activeTabId = tabsByOrd().length ? tabsByOrd()[0].tabId : archTabId;
+	}
+	saveData();
+	res.mssgs.unshift("user tabs replaced: " + oldTabs + " -> " + usrTabs().length);
+	return res;
+};
+//==============================================================================
 const replUsr = (data) => {
+	if (data.systemSettings) {
+		appData.systemSettings = cloneData(data.systemSettings);
+	}
 	if (data.userSettings) {
 		appData.userSettings = cloneData(data.userSettings);
 	}
@@ -496,6 +617,10 @@ const JSDStore = {
 	freeSlots: freeSlots,
 	tabHasFree: tabHasFree,
 	freePos: freePos,
+	freePosClosest: freePosClosest,
+	sharedGrid: sharedGrid,
+	pinTargetFor: pinTargetFor,
+	pinMovePlan: pinMovePlan,
 	saveTab: saveTab,
 	saveDial: saveDial,
 	delTab: delTab,
@@ -508,6 +633,8 @@ const JSDStore = {
 	moveDial: moveDial,
 	exportJson: exportJson,
 	importJson: importJson,
+	replDials: replDials,
+	replTabsDials: replTabsDials,
 	replUsr: replUsr,
 	sortTabs: sortTabs,
 	usrTabs: usrTabs,

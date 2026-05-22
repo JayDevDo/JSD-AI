@@ -53,6 +53,22 @@
 			"bgColor": "#B7E4C7",
 			"txtColor": "#000000",
 			"order": 2
+		},
+		{
+			"tabId": "DEV",
+			"rows": 4,
+			"cols": 6,
+			"bgColor": "#243B53",
+			"txtColor": "#D9EFFF",
+			"order": 3
+		},
+		{
+			"tabId": "MISC",
+			"rows": 4,
+			"cols": 6,
+			"bgColor": "#F4EBC1",
+			"txtColor": "#000000",
+			"order": 4
 		}
 	],
 	"allDials": [

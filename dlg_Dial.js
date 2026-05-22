@@ -10,6 +10,7 @@ const openDialDialog = (pos, dial = null) => {
 	const editMode = Boolean(dial);
 	const oldPos = editMode ? cloneData(dial.position) : null;
 	const workDial = dial ? cloneData(dial) : JSDStore.newDial(pos);
+	const lockPos = editMode && workDial.pinned;
 	const dialog = makeElement("div", { id: "dialDlg" });
 	const panel = makeElement("div", { id: "dialDlgPanel" });
 	const title = makeElement("h2", { textContent: editMode ? "Edit dial" : "Add dial" });
@@ -28,6 +29,8 @@ const openDialDialog = (pos, dial = null) => {
 	const actions = makeElement("div", { className: "dialogActions" });
 	const applyBtn = makeElement("button", { textContent: editMode ? "Apply" : "Add" });
 	const cancelBtn = makeElement("button", { textContent: "Cancel" });
+	const planMssg = makeElement("div", { id: "dialPlanMssg" });
+	let pinPlanConfirmed = false;
 	urlInput.type = "url";
 	urlInput.value = workDial.url;
 	urlInput.required = true;
@@ -38,7 +41,14 @@ const openDialDialog = (pos, dial = null) => {
 	delBtn.hidden = true;
 	applyBtn.type = "button";
 	cancelBtn.type = "button";
-	pinRow.hidden = !workDial.pinned && appData.allDials.filter((item) => item.pinned).length >= sys.maxPins;
+	pinRow.hidden = true;
+	planMssg.hidden = true;
+	const resetPinPlan = () => {
+		pinPlanConfirmed = false;
+		planMssg.hidden = true;
+		planMssg.textContent = "";
+		applyBtn.textContent = editMode ? "Apply" : "Add";
+	};
 	const addOpt = (select, value, label, selected = false) => {
 		const opt = makeElement("option", { textContent: label });
 		opt.value = value;
@@ -47,6 +57,24 @@ const openDialDialog = (pos, dial = null) => {
 	};
 	const slotFree = (tabId, row, col) => {
 		return !JSDStore.posTaken(JSDStore.makePos(tabId, row, col), oldPos);
+	};
+	const pinPlanForSelection = () => {
+		if (tabSelect.value === archTabId || rowSelect.disabled || colSelect.disabled) {
+			return { ok: false, mssgs: ["No pin target"], moves: [] };
+		}
+		const testDial = cloneData(workDial);
+		testDial.position = JSDStore.makePos(tabSelect.value, Number(rowSelect.value), Number(colSelect.value));
+		testDial.pinned = true;
+		return JSDStore.pinMovePlan(testDial, oldPos);
+	};
+	const updPinRow = () => {
+		const maxPins = appData.allDials.filter((item) => item.pinned).length >= sys.maxPins;
+		const hidePin = !workDial.pinned && (maxPins || !pinPlanForSelection().ok);
+		pinRow.hidden = hidePin;
+		pinRow.style.display = hidePin ? "none" : "contents";
+		if (hidePin) {
+			pinInput.checked = false;
+		}
 	};
 	const rowFree = (tabId, row) => {
 		const tab = JSDStore.tabById(tabId);
@@ -63,6 +91,7 @@ const openDialDialog = (pos, dial = null) => {
 		if (!tab || tab.tabId === archTabId) {
 			addOpt(colSelect, "0", "-");
 			colSelect.disabled = true;
+			updPinRow();
 			return;
 		}
 		colSelect.disabled = false;
@@ -74,6 +103,7 @@ const openDialDialog = (pos, dial = null) => {
 		if (colSelect.options.length && colSelect.selectedIndex === -1) {
 			colSelect.selectedIndex = 0;
 		}
+		updPinRow();
 	};
 	const fillRows = (wantRow = null, wantCol = null) => {
 		const tab = JSDStore.tabById(tabSelect.value);
@@ -82,6 +112,7 @@ const openDialDialog = (pos, dial = null) => {
 			addOpt(rowSelect, "0", "-");
 			rowSelect.disabled = true;
 			colSelect.disabled = true;
+			updPinRow();
 			return;
 		}
 		rowSelect.disabled = false;
@@ -97,6 +128,10 @@ const openDialDialog = (pos, dial = null) => {
 	};
 	const fillTabs = () => {
 		clearElm(tabSelect);
+		if (lockPos) {
+			addOpt(tabSelect, workDial.position.tabId, workDial.position.tabId, true);
+			return;
+		}
 		for (const tab of JSDStore.tabsByOrd()) {
 			if (JSDStore.tabHasFree(tab.tabId, oldPos)) {
 				addOpt(tabSelect, tab.tabId, tab.tabId, tab.tabId === workDial.position.tabId);
@@ -112,9 +147,19 @@ const openDialDialog = (pos, dial = null) => {
 	delCheck.addEventListener("change", () => {
 		delBtn.hidden = !delCheck.checked;
 	});
-	tabSelect.addEventListener("change", () => fillRows(0, 0));
-	rowSelect.addEventListener("change", () => fillCols(Number(colSelect.value)));
-	colSelect.addEventListener("change", () => fillRows(Number(rowSelect.value), Number(colSelect.value)));
+	tabSelect.addEventListener("change", () => {
+		resetPinPlan();
+		fillRows(0, 0);
+	});
+	rowSelect.addEventListener("change", () => {
+		resetPinPlan();
+		fillCols(Number(colSelect.value));
+	});
+	colSelect.addEventListener("change", () => {
+		resetPinPlan();
+		fillRows(Number(rowSelect.value), Number(colSelect.value));
+	});
+	pinInput.addEventListener("change", resetPinPlan);
 	applyBtn.addEventListener("click", () => {
 		if (tabSelect.value === archTabId) {
 			const res = editMode ? JSDArch.delToArch(oldPos) : { ok: false, mssgs: ["Cannot archive new dial"] };
@@ -133,6 +178,21 @@ const openDialDialog = (pos, dial = null) => {
 		workDial.txtColor = txtInput.value;
 		workDial.position = JSDStore.makePos(tabSelect.value, Number(rowSelect.value), Number(colSelect.value));
 		workDial.pinned = !pinRow.hidden && pinInput.checked;
+		if (workDial.pinned && (!editMode || !dial.pinned)) {
+			const plan = JSDStore.pinMovePlan(workDial, oldPos);
+			if (!plan.ok) {
+				planMssg.hidden = false;
+				planMssg.textContent = plan.mssgs.join("\n");
+				return;
+			}
+			if (plan.moves.length && !pinPlanConfirmed) {
+				pinPlanConfirmed = true;
+				planMssg.hidden = false;
+				planMssg.textContent = "Pinning will move:\n" + plan.mssgs.join("\n");
+				applyBtn.textContent = "Confirm pin";
+				return;
+			}
+		}
 		const res = JSDStore.saveDial(workDial, oldPos);
 		if (res.ok) {
 			renderApp(appData);
@@ -160,6 +220,12 @@ const openDialDialog = (pos, dial = null) => {
 	actions.appendChild(cancelBtn);
 	fillTabs();
 	fillRows(workDial.position.row, workDial.position.col);
+	if (lockPos) {
+		tabSelect.disabled = true;
+		rowSelect.disabled = true;
+		colSelect.disabled = true;
+	}
+	updPinRow();
 	panel.appendChild(title);
 	panel.appendChild(makeDialogRow("Tab", tabSelect));
 	panel.appendChild(makeDialogRow("Row", rowSelect));
@@ -168,12 +234,11 @@ const openDialDialog = (pos, dial = null) => {
 	panel.appendChild(makeDialogRow("URL", urlInput));
 	panel.appendChild(makeDialogRow("Background", bgInput));
 	panel.appendChild(makeDialogRow("Text", txtInput));
-	if (!pinRow.hidden) {
-		panel.appendChild(pinRow);
-	}
+	panel.appendChild(pinRow);
 	if (editMode) {
 		panel.appendChild(delRow);
 	}
+	panel.appendChild(planMssg);
 	panel.appendChild(actions);
 	dialog.appendChild(panel);
 	document.body.appendChild(dialog);
