@@ -4,6 +4,9 @@ JSD-AI is a lightweight browser start-page / speed-dial app.
 
 It stores tabs and dials in `localStorage`, renders everything from that stored data, and avoids framework baggage. No jQuery, no React, no Vue, no Angular, no `data-*` attributes. Just plain HTML, CSS, and JavaScript.
 
+## See it LIVE
+https://jaydevdo.github.io/JSD-AI/
+
 ## Current status
 
 Development snapshot.
