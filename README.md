@@ -8,10 +8,6 @@ It stores tabs and dials in `localStorage`, renders everything from stored data,
 
 https://jaydevdo.github.io/JSD-AI/
 
-## Repository
-
-https://github.com/JayDevDo/JSD-AI
-
 ## Current status
 
 Development snapshot.
