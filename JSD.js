@@ -1,30 +1,22 @@
 /*
 	JSD.js
-	Version = 20260521
+	Version = 20260524
 */
 "use strict";
 //==============================================================================
-const homePageUrl = "https://jaydevdo.github.io/JSD-AI/";
+const homePageUrl = "https://github.com/JayDevDo/JSD-AI";
 //==============================================================================
 const getElm = (elmId) => document.getElementById(elmId);
 //==============================================================================
 const clearElm = (elm) => {
-	while (elm.firstChild) {
-		elm.removeChild(elm.firstChild);
-	}
+	while (elm.firstChild) {elm.removeChild(elm.firstChild);}
 };
 //==============================================================================
 const makeElement = (tag, opts = {}) => {
 	const elm = document.createElement(tag);
-	if (opts.id) {
-		elm.id = opts.id;
-	}
-	if (opts.className) {
-		elm.className = opts.className;
-	}
-	if (opts.textContent) {
-		elm.textContent = opts.textContent;
-	}
+	if (opts.id) {elm.id = opts.id;}
+	if (opts.className) {elm.className = opts.className;}
+	if (opts.textContent) {elm.textContent = opts.textContent;}
 	return elm;
 };
 //==============================================================================
@@ -67,9 +59,7 @@ const makeDialogRow = (labelTxt, input) => {
 };
 //==============================================================================
 const showMssgs = (mssgs) => {
-	for (const mssg of mssgs) {
-		console.info(mssg);
-	}
+	for (const mssg of mssgs) {console.info(mssg);}
 };
 //==============================================================================
 const updAddBtn = () => {
@@ -103,9 +93,7 @@ const togView = () => {
 //==============================================================================
 const getActTab = () => {
 	const tab = JSDStore.tabById(JSDStore.getUsr().activeTabId);
-	if (tab && tab.tabId !== archTabId) {
-		return tab;
-	}
+	if (tab && tab.tabId !== archTabId) {return tab;}
 	JSDStore.setActTab(JSDStore.tabsByOrd()[0].tabId);
 	return JSDStore.tabById(JSDStore.getUsr().activeTabId);
 };
@@ -120,9 +108,7 @@ const pinAt = (row, col) => {
 };
 //==============================================================================
 const dialForPos = (pos) => {
-	if (pos.tabId !== archTabId) {
-		return pinAt(pos.row, pos.col) || JSDStore.dialAt(pos);
-	}
+	if (pos.tabId !== archTabId) {return pinAt(pos.row, pos.col) || JSDStore.dialAt(pos);}
 	return JSDStore.dialAt(pos);
 };
 //==============================================================================
@@ -155,8 +141,9 @@ const dialBttn = (dial) => {
 	if (dial.pinned) {
 		const pinIco = makeElement("div", { className: "dialPin" });
 		pinIco.style.background = dial.txtColor;
-		pinIco.style.color = dial.bgColor;
-		pinIco.style.borderColor = dial.bgColor;
+		pinIco.style.color = dial.txtColor;
+		pinIco.style.borderColor = dial.txtColor;
+		pinIco.style.setProperty("--pin-hole", dial.bgColor);
 		item.appendChild(pinIco);
 	}
 	return item;
@@ -190,9 +177,7 @@ const buildTabs = () => {
 		const nameBtn = makeElement("button", { className: "tabName", textContent: tab.tabId });
 		tabElm.style.background = tab.bgColor;
 		tabElm.style.color = tab.txtColor;
-		if (tab.tabId === JSDStore.getUsr().activeTabId) {
-			tabElm.classList.add("active");
-		}
+		if (tab.tabId === JSDStore.getUsr().activeTabId) {tabElm.classList.add("active");}
 		menuBtn.addEventListener("click", () => openTabDialog(tab));
 		nameBtn.addEventListener("click", () => {
 			JSDStore.setActTab(tab.tabId);

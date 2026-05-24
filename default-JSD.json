@@ -27,7 +27,7 @@
 		],
 		"theme": "dark",
 		"view": "vView",
-		"activeTabId": "WORK"
+		"activeTabId": "HOME"
 	},
 	"allTabs": [
 		{
@@ -39,48 +39,61 @@
 			"order": 0
 		},
 		{
-			"tabId": "WORK",
+			"tabId": "HOME",
 			"rows": 4,
-			"cols": 6,
-			"bgColor": "#1F3A5F",
-			"txtColor": "#F6D365",
+			"cols": 4,
+			"bgColor": "#f6d32d",
+			"txtColor": "#000000",
 			"order": 1
 		},
 		{
-			"tabId": "HOME",
-			"rows": 3,
-			"cols": 3,
-			"bgColor": "#B7E4C7",
-			"txtColor": "#000000",
+			"tabId": "WORK",
+			"rows": 4,
+			"cols": 6,
+			"bgColor": "#275bcf",
+			"txtColor": "#ffffff",
 			"order": 2
 		},
 		{
 			"tabId": "DEV",
 			"rows": 4,
 			"cols": 6,
-			"bgColor": "#243B53",
-			"txtColor": "#D9EFFF",
+			"bgColor": "#7fade6",
+			"txtColor": "#d9efff",
 			"order": 3
 		},
 		{
 			"tabId": "MISC",
 			"rows": 4,
 			"cols": 6,
-			"bgColor": "#F4EBC1",
+			"bgColor": "#33d17a",
 			"txtColor": "#000000",
 			"order": 4
 		}
 	],
 	"allDials": [
 		{
-			"label": "Github Repo",
+			"label": "JayDevDo JSD-AI",
 			"url": "https://github.com/JayDevDo/JSD-AI",
-			"bgColor": "#FF7800",
+			"bgColor": "#ffbe6f",
 			"txtColor": "#000000",
 			"position": {
-				"tabId": "WORK",
+				"tabId": "HOME",
 				"row": 0,
-				"col": 0
+				"col": 1
+			},
+			"pinned": false,
+			"lastClicked": ""
+		},
+		{
+			"label": "chatGPT",
+			"url": "https://chatGPT.com",
+			"bgColor": "#ffbe6f",
+			"txtColor": "#000000",
+			"position": {
+				"tabId": "HOME",
+				"row": 0,
+				"col": 2
 			},
 			"pinned": false,
 			"lastClicked": ""
@@ -88,11 +101,24 @@
 		{
 			"label": "search DDG",
 			"url": "https://duckduckgo.com/?q=entersearchstringhere&df=y&ia=web",
-			"bgColor": "#000000",
-			"txtColor": "#FFFFFF",
+			"bgColor": "#ffffff",
+			"txtColor": "#000000",
 			"position": {
 				"tabId": "HOME",
 				"row": 0,
+				"col": 0
+			},
+			"pinned": true,
+			"lastClicked": ""
+		},
+		{
+			"label": "livefpl",
+			"url": "https://www.livefpl.net/rank",
+			"bgColor": "#000000",
+			"txtColor": "#ffffff",
+			"position": {
+				"tabId": "HOME",
+				"row": 1,
 				"col": 0
 			},
 			"pinned": false,

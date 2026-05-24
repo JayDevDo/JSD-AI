@@ -2,10 +2,15 @@
 
 JSD-AI is a lightweight browser start-page / speed-dial app.
 
-It stores tabs and dials in `localStorage`, renders everything from that stored data, and avoids framework baggage. No jQuery, no React, no Vue, no Angular, no `data-*` attributes. Just plain HTML, CSS, and JavaScript.
+It stores tabs and dials in `localStorage`, renders everything from stored data, and avoids framework baggage. No jQuery, no React, no Vue, no Angular, no `data-*` attributes. Just plain HTML, CSS, and JavaScript.
 
 ## See it LIVE
+
 https://jaydevdo.github.io/JSD-AI/
+
+## Repository
+
+https://github.com/JayDevDo/JSD-AI
 
 ## Current status
 
@@ -14,16 +19,20 @@ Development snapshot.
 Current baseline:
 
 ```text
-version: 1.0.1
+version: 1.0.3
 storage: localStorage
 layout: vertical / horizontal toggle
 dialogs: JS-built, no native dialog/form dependency
+positioning: position-based dial identity
+pinning: shared row/column projection
+archive: FIFO archive tab
+json: import / export dialog
 license: MIT
 ```
 
 ## What it does
 
-JSD-AI lets the user maintain a browser-local dashboard of tabs and URL dials.
+JSD-AI lets the user maintain a browser-local dashboard of tabs and URL/path dials.
 
 Each tab has:
 
@@ -74,9 +83,124 @@ There are no generated dial IDs. Position is the unique location key.
 - Tabs can be added, edited, deleted, and reordered
 - Dials can be added, edited, pinned, moved, archived, and deleted
 - Pinned dials appear on every normal tab at the same row/col
+- Occupied cells are blocked in dial position selectors
+- Pinning can move conflicting dials when free space exists
 - Archive tab is hidden from normal navigation
 - Removed dials are archived
+- JSON import/export supports settings, dials, and tabs+dials
 ```
+
+## Views
+
+The app supports two layouts.
+
+### Vertical view
+
+```text
+tabs left
+dial grid right
+```
+
+In vertical view, inactive tabs are visually shortened so only the active tab connects to the grid.
+
+### Horizontal view
+
+```text
+tabs top
+dial grid below
+```
+
+In horizontal view, inactive tabs have a bottom gap so only the active tab connects to the grid.
+
+## Home / repo button
+
+The `navHome` item opens the GitHub repository for this project:
+
+```text
+https://github.com/JayDevDo/JSD-AI
+```
+
+## Dialogs
+
+Dialogs are created by JavaScript when needed.
+
+The app does not use native `<dialog>` or `<form>` for the custom dialogs. This avoids browser/user-agent styling interference, especially in older or unusual browsers.
+
+Current dialogs:
+
+```text
+dlg_Tab.js
+dlg_Dial.js
+dlg_Json.js
+```
+
+### Tab dialog
+
+The tab dialog handles:
+
+```text
+tab name
+rows
+columns
+order
+background color
+text color
+delete checkbox
+```
+
+Tab name validation is handled in `dlg_Tab.js`.
+
+### Dial dialog
+
+The dial dialog handles:
+
+```text
+label
+URL/path text
+background color
+text color
+tab
+row
+column
+pinned
+delete checkbox
+```
+
+The URL/path field is a wrapping textarea. It is treated as plain text and is not browser-validated as a URL.
+
+When adding a dial, the dialog defaults to:
+
+```text
+clicked tab
+clicked row
+clicked column
+dial background = tab text color
+dial text = tab background color
+```
+
+Row and column selectors display human-friendly numbers, while stored data remains zero-based.
+
+```text
+displayed row 1 = stored row 0
+displayed column 1 = stored col 0
+```
+
+## Pinning behavior
+
+Pinned dials are stored once in `allDials`.
+
+A pinned dial projects onto every non-archive tab at the same row/column.
+
+When pinning a dial:
+
+```text
+- The selected position must fit within the shared grid of all normal tabs
+- A row/column already used by another pinned dial is blocked
+- If a normal dial occupies the projected position on another tab, the app tries to move it
+- If no free fallback slot exists, pinning is blocked
+```
+
+Pinned dials show a CSS-drawn padlock icon.
 
 ## Archive behavior
 
@@ -93,37 +217,30 @@ Archive is FIFO. When full, the oldest archived dial is dropped.
 
 Pinned dials lose their pinned state when archived.
 
-## Views
+## JSON import / export
 
-The app supports two layouts.
-
-### Vertical view
+The JSON dialog can:
 
 ```text
-tabs left
-dial grid right
+- Export the current app data
+- Load JSON from a file
+- Paste JSON text
+- Import settings
+- Import dials
+- Import tabs+dials
+- Import both settings and tabs+dials
 ```
 
-### Horizontal view
+JSON parsing and import analysis live in:
 
 ```text
-tabs top
-dial grid below
+fctr_Json.js
 ```
 
-The `navHome` item opens the GitHub Pages site for this repository.
-
-## Dialogs
-
-Dialogs are created by JavaScript when needed.
-
-The app does not use native `<dialog>` or `<form>` for the custom dialogs. This avoids browser/user-agent styling interference, especially in older or unusual browsers.
-
-Current dialogs:
+The dialog UI lives in:
 
 ```text
-dlg_Tab.js
-dlg_Dial.js
+dlg_Json.js
 ```
 
 ## Browser notes
@@ -143,11 +260,15 @@ If a browser does not support native color inputs, it may show a plain text fiel
 
 ```text
 index.html
+JSD.css
 JSD.js
 fctr_LclStrg.js
+fctr_Positioning.js
 fctr_Archive.js
+fctr_Json.js
 dlg_Tab.js
 dlg_Dial.js
+dlg_Json.js
 default-JSD.json
 LICENSE
 README.md
@@ -157,27 +278,113 @@ README.md
 
 ### `index.html`
 
-Contains the app scaffold and CSS.
+Contains the app scaffold and script loading order.
+
+### `JSD.css`
+
+Contains layout, tab styling, dial styling, dialog styling, textarea styling, and the pinned dial icon.
 
 ### `JSD.js`
 
-Main UI builder. Handles app init, view toggle, tab rendering, dial grid rendering, active tab rebuilds, button wiring, and small DOM helpers.
+Main UI builder.
+
+Handles app init, view toggle, tab rendering, dial grid rendering, active tab rebuilds, button wiring, and small DOM helpers.
 
 ### `fctr_LclStrg.js`
 
-Storage/data layer. Handles localStorage load/save, default data loading, archive tab repair, tab lookup, dial lookup, position checks, tab saving, dial saving, pin/unpin logic, move/delete helpers, and resize consequences.
+Storage and data mutation layer.
+
+Handles:
+
+```text
+localStorage load/save
+default data loading
+ARCHIVE tab repair
+tab lookup
+dial lookup
+tab ordering
+tab save
+dial save
+tab delete
+last-click timestamp
+JSON export
+JSON replacement entry points
+```
+
+### `fctr_Positioning.js`
+
+Positioning and pinning logic layer.
+
+Handles:
+
+```text
+position comparisons
+cell comparisons
+occupied-position checks
+free slot lookup
+closest free slot lookup
+shared pin grid calculation
+pin target validation
+pin move planning
+pin collision checks
+in-memory move operations
+resize move-out logic
+```
+
+This file does not write to `localStorage`.
 
 ### `fctr_Archive.js`
 
-Archive FIFO logic. Handles archive list, archive dial, and delete-to-archive.
+Archive FIFO logic.
+
+Handles:
+
+```text
+archive list
+archive dial
+delete-to-archive
+```
+
+### `fctr_Json.js`
+
+JSON parse/import analysis layer.
+
+Handles:
+
+```text
+JSON part detection
+settings detection
+tabs/dials detection
+tabs+dials validation
+JSON summary generation
+import mode routing
+```
 
 ### `dlg_Tab.js`
 
-Tab add/edit dialog. Includes tab name, rows, columns, order, colors, and delete checkbox row.
+Tab add/edit dialog.
+
+Includes tab name, rows, columns, order, colors, validation, and delete checkbox row.
 
 ### `dlg_Dial.js`
 
-Dial add/edit dialog. Includes label, URL, tab, row, column, colors, pinned option, and delete checkbox row.
+Dial add/edit dialog.
+
+Includes label, URL/path textarea, colors, tab, row, column, pinned option, delete checkbox row, and pin confirmation messages.
+
+### `dlg_Json.js`
+
+JSON import/export dialog UI.
+
+Includes textarea, file loading, parse messages, import buttons, export button, and cancel button.
+
+### `default-JSD.json`
+
+Default app data used when `localStorage` is empty.
+
+### `LICENSE`
+
+MIT license.
 
 ## Data rules
 
@@ -206,11 +413,12 @@ A pinned dial projects onto every non-archive tab at the same row/col.
 
 ### Position checks
 
-`posTaken(pos)` checks both:
+Position checks consider:
 
 ```text
-exact stored dial at pos
+exact stored dial at position
 pinned dial projection at row/col
+temporary pin planning projection
 ```
 
 Archive ignores pinned projection.
@@ -227,6 +435,7 @@ No hidden generated IDs for dials
 No native dialog/form dependency for custom dialogs
 Keep function and variable names concise
 Prefer direct readable code over over-abstracted helpers
+Keep one-line if statements on one line when practical
 ```
 
 ## Running locally

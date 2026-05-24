@@ -25,6 +25,14 @@ const openTabDialog = (tab = null) => {
 	const actions = makeElement("div", { className: "dialogActions" });
 	const applyBtn = makeElement("button", { textContent: editMode ? "Apply" : "Add" });
 	const cancelBtn = makeElement("button", { textContent: "Cancel" });
+	const validTab = (tabId) => {
+		if (tabId.length < sys.minLabelLen || tabId.length > sys.maxTabLabelLen) {return false;}
+		for (const oldTab of JSDStore.getTabs()) {
+			if (oldId !== null && oldTab.tabId === oldId) {continue;}
+			if (oldTab.tabId.toLowerCase() === tabId.toLowerCase()) {return false;}
+		}
+		return true;
+	};
 	delCheck.type = "checkbox";
 	delBtn.type = "button";
 	delBtn.hidden = true;
@@ -34,6 +42,10 @@ const openTabDialog = (tab = null) => {
 		delBtn.hidden = !delCheck.checked;
 	});
 	applyBtn.addEventListener("click", () => {
+		if (!validTab(tabInput.value)) {
+			if (typeof showMssgs === "function") {showMssgs(["Tab name not valid or already used: " + tabInput.value]);}
+			return;
+		}
 		workTab.tabId = tabInput.value;
 		workTab.rows = Number(rowsSelect.value);
 		workTab.cols = Number(colsSelect.value);
@@ -45,9 +57,7 @@ const openTabDialog = (tab = null) => {
 			renderApp(appData);
 			dialog.remove();
 		}
-		if (typeof showMssgs === "function") {
-			showMssgs(res.mssgs);
-		}
+		if (typeof showMssgs === "function") {showMssgs(res.mssgs);}
 	});
 	delBtn.addEventListener("click", () => {
 		const res = JSDStore.delTab(oldId);
@@ -55,9 +65,7 @@ const openTabDialog = (tab = null) => {
 			renderApp(appData);
 			dialog.remove();
 		}
-		if (typeof showMssgs === "function") {
-			showMssgs(res.mssgs);
-		}
+		if (typeof showMssgs === "function") {showMssgs(res.mssgs);}
 	});
 	cancelBtn.addEventListener("click", () => dialog.remove());
 	delRow.appendChild(makeElement("label", { textContent: "Delete tab" }));
@@ -72,9 +80,7 @@ const openTabDialog = (tab = null) => {
 	panel.appendChild(makeDialogRow("Order", ordSelect));
 	panel.appendChild(makeDialogRow("Background", bgInput));
 	panel.appendChild(makeDialogRow("Text", txtInput));
-	if (editMode) {
-		panel.appendChild(delRow);
-	}
+	if (editMode) {panel.appendChild(delRow);}
 	panel.appendChild(actions);
 	dialog.appendChild(panel);
 	document.body.appendChild(dialog);

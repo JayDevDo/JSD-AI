@@ -133,11 +133,11 @@ html, body {
 }
 .dialPin {
 	position: absolute;
-	top: 3px;
+	top: 13px;
 	right: 3px;
-	width: 14px;
-	height: 12px;
-	border: 1px solid #444444;
+	width: 16px;
+	height: 13px;
+	border: 2px solid #444444;
 	pointer-events: none;
 	padding: 0;
 }
@@ -145,22 +145,23 @@ html, body {
 	content: "";
 	position: absolute;
 	left: 3px;
-	top: -7px;
-	width: 6px;
-	height: 7px;
-	border: 2px solid currentColor;
+	top: -11px;
+	width: 5px;
+	height: 10px;
+	border: 3px solid currentColor;
 	border-bottom: 0;
-	border-radius: 5px 5px 0 0;
+	border-radius: 7px 7px 0 0;
 }
 .dialPin::after {
 	content: "";
 	position: absolute;
-	left: 6px;
-	top: 4px;
+	left: 7px;
+	top: 5px;
 	width: 2px;
-	height: 4px;
-	background: currentColor;
+	height: 5px;
+	background: var(--pin-hole);
 }
+
 #app.vView #navTabs {
 	display: flex;
 	flex-direction: column;
@@ -175,12 +176,13 @@ html, body {
 	min-height: 0;
 }
 #app.vView .tab {
-	margin: 2px 0 2px 4px;
-	border-right: 0;
-	border-radius: 8px 0 0 8px;
+	margin: 2px 18px 2px 4px;
+	border-radius: 8px;
 }
 #app.vView .tab.active {
 	margin-right: -1px;
+	border-right: 0;
+	border-radius: 8px 0 0 8px;
 }
 #app.vView #dialGrid {
 	border-left: 1px solid rgba(255, 255, 255, 0.45);
@@ -203,14 +205,15 @@ html, body {
 	min-width: 0;
 }
 #app.hView .tab {
-	margin: 4px 2px 0 2px;
+	margin: 4px 2px 18px 2px;
 	padding: 1px 6px;
 	grid-template-columns: 1fr min-content;
-	border-bottom: 0;
-	border-radius: 8px 8px 0 0;
+	border-radius: 8px;
 }
 #app.hView .tab.active {
 	margin-bottom: -1px;
+	border-bottom: 0;
+	border-radius: 8px 8px 0 0;
 }
 #app.hView .tabMenu {
 	justify-items: end;
@@ -276,6 +279,9 @@ html, body {
 	max-height: 88vh;
 	overflow: hidden;
 }
+#dialDlgPanel {
+	width: min(560px, 92vw);
+}
 #jsonDlgPanel {
 	width: min(760px, 92vw);
 }
@@ -291,7 +297,7 @@ html, body {
 	align-items: center;
 	padding-right: 6px;
 }
-.dialogRow input, .dialogRow select {
+.dialogRow input, .dialogRow select, .dialogRow textarea {
 	width: 100%;
 	min-width: 0;
 }
@@ -317,6 +323,17 @@ html, body {
 #tabDelBtn[hidden], #dialDelBtn[hidden] {
 	display: none;
 }
+#dialUrlInput {
+	min-height: 4.8em;
+	resize: vertical;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+#jsonTextWrap {
+	grid-column: 1 / -1;
+	display: grid;
+	gap: 4px;
+}
 #jsonText {
 	grid-column: 1 / -1;
 	width: 100%;
@@ -339,7 +356,7 @@ html, body {
 	display: none;
 }
 #tabDlg button, #tabDlg input, #tabDlg select,
-#dialDlg button, #dialDlg input, #dialDlg select,
+#dialDlg button, #dialDlg input, #dialDlg select, #dialDlg textarea,
 #jsonDlg button, #jsonDlg input, #jsonDlg select, #jsonDlg textarea {
 	margin: 0;
 	border: 1px solid #555555;
