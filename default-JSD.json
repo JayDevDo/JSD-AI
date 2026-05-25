@@ -73,32 +73,6 @@
 	],
 	"allDials": [
 		{
-			"label": "JayDevDo JSD-AI",
-			"url": "https://github.com/JayDevDo/JSD-AI",
-			"bgColor": "#ffbe6f",
-			"txtColor": "#000000",
-			"position": {
-				"tabId": "HOME",
-				"row": 0,
-				"col": 1
-			},
-			"pinned": false,
-			"lastClicked": ""
-		},
-		{
-			"label": "chatGPT",
-			"url": "https://chatGPT.com",
-			"bgColor": "#ffbe6f",
-			"txtColor": "#000000",
-			"position": {
-				"tabId": "HOME",
-				"row": 0,
-				"col": 2
-			},
-			"pinned": false,
-			"lastClicked": ""
-		},
-		{
 			"label": "search DDG",
 			"url": "https://duckduckgo.com/?q=entersearchstringhere&df=y&ia=web",
 			"bgColor": "#ffffff",
@@ -112,14 +86,92 @@
 			"lastClicked": ""
 		},
 		{
-			"label": "livefpl",
-			"url": "https://www.livefpl.net/rank",
+			"label": "JSD-AI",
+			"url": "https://github.com/JayDevDo/JSD-AI",
+			"bgColor": "#ffbe6f",
+			"txtColor": "#000000",
+			"position": {
+				"tabId": "HOME",
+				"row": 0,
+				"col": 1
+			},
+			"pinned": false,
+			"lastClicked": ""
+		},
+		{
+			"label": "CryptPad",
+			"url": "https://cryptpad.fr/",
 			"bgColor": "#000000",
 			"txtColor": "#ffffff",
 			"position": {
-				"tabId": "HOME",
-				"row": 1,
-				"col": 0
+				"tabId": "WORK",
+				"row": 0,
+				"col": 1
+			},
+			"pinned": false,
+			"lastClicked": ""
+		},
+		{
+			"label": "LibreOffice",
+			"url": "https://help.libreoffice.org/latest/en-US/text/shared/05/new_help.html",
+			"bgColor": "#ffffff",
+			"txtColor": "#000000",
+			"position": {
+				"tabId": "WORK",
+				"row": 0,
+				"col": 2
+			},
+			"pinned": false,
+			"lastClicked": ""
+		},
+		{
+			"label": "Python Docs",
+			"url": "https://docs.python.org/3/",
+			"bgColor": "#000000",
+			"txtColor": "#bae24c",
+			"position": {
+				"tabId": "DEV",
+				"row": 0,
+				"col": 1
+			},
+			"pinned": false,
+			"lastClicked": ""
+		},
+		{
+			"label": "W3 Color",
+			"url": "https://www.w3schools.com/colors/colors_converter.asp",
+			"bgColor": "#000000",
+			"txtColor": "#21d7b2",
+			"position": {
+				"tabId": "DEV",
+				"row": 0,
+				"col": 2
+			},
+			"pinned": false,
+			"lastClicked": ""
+		},
+		{
+			"label": "Wikipedia",
+			"url": "https://www.wikipedia.org/",
+			"bgColor": "#ffffff",
+			"txtColor": "#000000",
+			"position": {
+				"tabId": "MISC",
+				"row": 0,
+				"col": 1
+			},
+			"pinned": false,
+			"lastClicked": ""
+		},
+		{
+			"label": "ChatGPT",
+			"url": "https://chatgpt.com/",
+			"bgColor": "#000000",
+			"txtColor": "#ffffff",
+			"position": {
+				"tabId": "MISC",
+				"row": 0,
+				"col": 2
 			},
 			"pinned": false,
 			"lastClicked": ""

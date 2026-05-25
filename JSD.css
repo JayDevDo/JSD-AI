@@ -90,6 +90,7 @@ html, body {
 	justify-items: start;
 	padding: 2px 4px;
 	order: 1;
+	font-size: 0.75em;	
 }
 .tabName {
 	justify-items: center;
@@ -200,7 +201,7 @@ html, body {
 }
 #app.hView #navHome {
 	flex: 0 0 16%;
-	max-width: 16%;
+	max-width: 12%;
 }
 #app.hView #navTabs > .tab:not(#navHome) {
 	flex: 1 1 0;
@@ -208,7 +209,7 @@ html, body {
 }
 #app.hView .tab {
 	margin: 4px 2px 18px 2px;
-	padding: 1px 6px;
+	padding: 1px 2px;
 	grid-template-columns: 1fr min-content;
 	border-radius: 8px;
 }
@@ -240,7 +241,7 @@ html, body {
 }
 #addTabBtn, #jsonBtn, #settingsBtn {
 	padding: 2px 6px;
-	font-size: 2em;
+	font-size: 1.6em;
 	font-weight: 700;
 }
 #jsonBtn {

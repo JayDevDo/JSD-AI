@@ -191,7 +191,6 @@ const renderApp = () => {
 const wireHome = () => {
 	getElm("navHome").addEventListener("click", openHome);
 	getElm("addTabBtn").addEventListener("click", () => openTabDialog());
-	getElm("jsonBtn").addEventListener("click", () => openJsonDialog());
 	getElm("settingsBtn").addEventListener("click", () => openSettingsDialog());
 };
 //==============================================================================

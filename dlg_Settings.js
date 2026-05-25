@@ -31,6 +31,25 @@ const makeCompactSelect = (elmId, values, selectedValue) => {
 	return select;
 };
 //==============================================================================
+const makeViewToggleButton = (elmId, selectedValue) => {
+	const labels = {
+		vView: "tabs left",
+		hView: "tabs on top"
+	};
+	const nextView = (view) => view === "vView" ? "hView" : "vView";
+	const button = makeElement("button", { id: elmId, textContent: labels[nextView(selectedValue)] });
+	button.type = "button";
+	button.value = selectedValue;
+	button.style.whiteSpace = "nowrap";
+	button.addEventListener("click", () => {
+		button.value = nextView(button.value);
+		setView(button.value);
+		renderApp();
+		button.closest("#settingsDlg").remove();
+	});
+	return button;
+};
+//==============================================================================
 const makeEmptySettingValue = () => {
 	const value = makeElement("div", { textContent: "" });
 	value.style.minWidth = "7ch";
@@ -141,67 +160,85 @@ const makeArchiveTableCell = (text) => {
 	return cell;
 };
 //==============================================================================
-const makeArchiveTable = () => {
+const makeArchiveTable = (archiveSizeValue) => {
 	const wrap = makeElement("div");
-	const head = makeElement("div");
 	const body = makeElement("div");
-	const archiveTab = JSDStore.tabById(archTabId);
-	const archiveCols = archiveTab ? archiveTab.cols : 6;
-	const archiveDials = JSDStore.tabDials(archTabId);
 
 	wrap.style.gridColumn = "1 / -1";
 	wrap.style.width = "100%";
 	wrap.style.maxWidth = "100%";
 	wrap.style.minWidth = "0";
-	wrap.style.height = "84px";
-	wrap.style.minHeight = "84px";
-	wrap.style.maxHeight = "84px";
+	wrap.style.height = "108px";
+	wrap.style.minHeight = "108px";
+	wrap.style.maxHeight = "108px";
 	wrap.style.overflowY = "auto";
 	wrap.style.overflowX = "hidden";
 	wrap.style.border = "1px solid #444444";
 	wrap.style.background = "#111111";
 	wrap.style.boxSizing = "border-box";
 
-	head.style.position = "sticky";
-	head.style.top = "0";
-	head.style.zIndex = "1";
-	head.style.display = "grid";
-	head.style.gridTemplateColumns = "7ch minmax(0, 1fr)";
-	head.style.background = "#181818";
-	head.style.color = "#cccccc";
-	head.style.borderBottom = "1px solid #444444";
-	head.style.fontWeight = "bold";
-	head.style.minWidth = "0";
-
 	body.style.display = "grid";
 	body.style.gridAutoRows = "min-content";
 	body.style.minWidth = "0";
 
-	head.appendChild(makeArchiveTableCell("Order"));
-	head.appendChild(makeArchiveTableCell("Label"));
-	wrap.appendChild(head);
-
-	for (const dial of archiveDials) {
-		const row = makeElement("div");
-		const order = (dial.position.row * archiveCols) + dial.position.col;
-		row.style.display = "grid";
-		row.style.gridTemplateColumns = "7ch minmax(0, 1fr)";
-		row.style.minWidth = "0";
-		row.appendChild(makeArchiveTableCell(order.toString()));
-		row.appendChild(makeArchiveTableCell(dial.label || ""));
-		body.appendChild(row);
-	}
-
-	if (!archiveDials.length) {
-		const row = makeElement("div");
-		row.style.display = "grid";
-		row.style.gridTemplateColumns = "1fr";
-		row.style.minWidth = "0";
-		row.appendChild(makeArchiveTableCell("Archive empty"));
-		body.appendChild(row);
-	}
-
 	wrap.appendChild(body);
+
+	const redrawArchiveTable = () => {
+		const archiveTab = JSDStore.tabById(archTabId);
+		const archiveCols = archiveTab ? archiveTab.cols : 6;
+		const archiveDials = JSDStore.tabDials(archTabId);
+
+		clearElm(body);
+		archiveSizeValue.textContent = archiveDials.length.toString();
+
+		for (const dial of archiveDials) {
+			const row = makeElement("div");
+			const order = (dial.position.row * archiveCols) + dial.position.col;
+			const pos = cloneData(dial.position);
+			const restoreBtn = makeElement("button", { textContent: "restore" });
+			const deleteBtn = makeElement("button", { textContent: "delete4ever" });
+
+			restoreBtn.type = "button";
+			deleteBtn.type = "button";
+			restoreBtn.style.whiteSpace = "nowrap";
+			deleteBtn.style.whiteSpace = "nowrap";
+
+			row.style.display = "grid";
+			row.style.gridTemplateColumns = "7ch minmax(0, 1fr) min-content min-content";
+			row.style.minWidth = "0";
+
+			restoreBtn.addEventListener("click", () => {
+				const res = JSDArch.restoreFromArchPos(pos);
+				redrawArchiveTable();
+				renderApp();
+				if (typeof showMssgs === "function") {showMssgs(res.mssgs);}
+			});
+
+			deleteBtn.addEventListener("click", () => {
+				const res = JSDArch.deleteFromArchPos(pos);
+				redrawArchiveTable();
+				renderApp();
+				if (typeof showMssgs === "function") {showMssgs(res.mssgs);}
+			});
+
+			row.appendChild(makeArchiveTableCell(order.toString()));
+			row.appendChild(makeArchiveTableCell(dial.label || ""));
+			row.appendChild(restoreBtn);
+			row.appendChild(deleteBtn);
+			body.appendChild(row);
+		}
+
+		if (!archiveDials.length) {
+			const row = makeElement("div");
+			row.style.display = "grid";
+			row.style.gridTemplateColumns = "1fr";
+			row.style.minWidth = "0";
+			row.appendChild(makeArchiveTableCell("Archive empty"));
+			body.appendChild(row);
+		}
+	};
+
+	redrawArchiveTable();
 	return wrap;
 };
 //==============================================================================
@@ -288,7 +325,8 @@ const openSettingsDialog = () => {
 	const maxDialLabelInput = makeCompactNumSelect("setMaxDialLabelLen", 8, 16, sys.maxDialLabelLen);
 
 	const themeInput = makeCompactSelect("setTheme", sys.themeOptions, usr.theme);
-	const viewInput = makeCompactSelect("setView", ["vView", "hView"], usr.view);
+	const viewInput = makeViewToggleButton("setView", usr.view);
+
 	const userContrastMinInput = makeDecimalInput("setUserContrastMin", usr.contrastLevel[0]);
 	const userContrastMaxInput = makeDecimalInput("setUserContrastMax", usr.contrastLevel[1]);
 
@@ -299,10 +337,16 @@ const openSettingsDialog = () => {
 	const contrastMaxValue = makeReadOnlyValue(sys.contrastLimits[1]);
 	const archiveSizeValue = makeReadOnlyValue(JSDStore.tabDials(archTabId).length);
 
-	const restoreBtn = makeElement("button", { textContent: "Restore from archive" });
+	const jsonBtn = makeElement("button", { textContent: "import - export" });
 	const actions = makeElement("div", { className: "dialogActions" });
 	const applyBtn = makeElement("button", { textContent: "Apply" });
 	const cancelBtn = makeElement("button", { textContent: "Cancel" });
+
+	jsonBtn.type = "button";
+	jsonBtn.addEventListener("click", () => {
+		dialog.remove();
+		openJsonDialog();
+	});
 
 	const sysGrid = makeSettingsGrid([
 		{ label: "Rows", min: minRowsInput, max: maxRowsInput },
@@ -326,16 +370,22 @@ const openSettingsDialog = () => {
 			valueB: makeContrastPair(userContrastMaxInput, contrastMaxValue)
 		},
 		{
+			labelA: makeSettingsGridCell("JSON"),
+			valueA: jsonBtn,
+			labelB: makeEmptySettingValue(),
+			valueB: makeEmptySettingValue()
+		},
+		{
 			full: makeArchiveHeader("Archive")
 		},
 		{
-			labelA: makeEmptySettingValue(),
-			valueA: restoreBtn,
+			labelA: makeSettingsGridCell("Items"),
+			valueA: archiveSizeValue,
 			labelB: makeEmptySettingValue(),
-			valueB: archiveSizeValue
+			valueB: makeEmptySettingValue()
 		},
 		{
-			full: makeArchiveTable()
+			full: makeArchiveTable(archiveSizeValue)
 		}
 	]);
 
@@ -353,7 +403,6 @@ const openSettingsDialog = () => {
 		return msgs;
 	};
 
-	restoreBtn.type = "button";
 	applyBtn.type = "button";
 	cancelBtn.type = "button";
 

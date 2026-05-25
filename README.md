@@ -2,9 +2,13 @@
 
 JSD-AI is a lightweight browser start-page / speed-dial app.
 
-It stores tabs and dials in `localStorage`, renders everything from stored data, and avoids framework baggage. No jQuery, no React, no Vue, no Angular, no `data-*` attributes. Just plain HTML, CSS, and JavaScript.
+The app scaffold is served from the project host: HTML, CSS, JavaScript, and the default JSON scaffold. 
+Your personal tabs, dials, settings, archive contents, and imported data live in your browser `localStorage`.
 
-## See it LIVE
+There is no account, no backend database, no sync service, and no monitoring of your personal speed-dial data. 
+The server provides the app shell; your dashboard stays local unless you export it or manually share it.
+
+## Live app
 
 https://jaydevdo.github.io/JSD-AI/
 
@@ -12,25 +16,38 @@ https://jaydevdo.github.io/JSD-AI/
 
 Development snapshot.
 
-Current baseline:
-
 ```text
-version: 1.0.4
+version: 1.0.5
 storage: localStorage
-layout: vertical / horizontal toggle
-dialogs: JS-built, no native dialog/form dependency
+layout: vertical / horizontal
+dialogs: JavaScript-built
 positioning: position-based dial identity
 pinning: shared row/column projection
 archive: FIFO archive tab
-json: import / export dialog
+json: import / export, including old-format conversion
 license: MIT
 ```
 
 ## What it does
 
-JSD-AI lets the user maintain a browser-local dashboard of tabs and URL/path dials.
+JSD-AI lets you maintain a browser-local dashboard of tabs and URL/path dials.
 
-Each tab has:
+Core behavior:
+
+```text
+- Loads saved localStorage data when present
+- Falls back to default-JSD.json when localStorage is empty
+- Stores user tabs, dials, settings, and archive locally
+- Supports tabs on the left or tabs on top
+- Supports pinned dials across normal tabs
+- Archives deleted dials instead of immediately destroying them
+- Allows archived dials to be restored or deleted forever
+- Supports JSON import/export
+```
+
+## Data model
+
+Tabs use:
 
 ```text
 tabId
@@ -41,7 +58,7 @@ txtColor
 order
 ```
 
-Each dial has:
+Dials use:
 
 ```text
 label
@@ -65,96 +82,73 @@ Dial position is the dial identity:
 
 There are no generated dial IDs. Position is the unique location key.
 
-## Main features
+## Local data and privacy
+
+The hosted files provide the scaffold. Your edited dashboard data is stored in your browser.
 
 ```text
-- Loads from localStorage if data exists
-- Falls back to default-JSD.json when localStorage is empty
-- Repairs missing ARCHIVE tab during init
-- Supports vertical and horizontal tab views
-- Builds tab grid from row/column settings
-- Builds dial grid from active tab rows/cols
-- Empty cells show Add Dial
-- Existing dials can be opened or edited
-- Tabs can be added, edited, deleted, and reordered
-- Dials can be added, edited, pinned, moved, archived, and deleted
-- Pinned dials appear on every normal tab at the same row/col
-- Occupied cells are blocked in dial position selectors
-- Pinning can move conflicting dials when free space exists
-- Archive tab is hidden from normal navigation
-- Removed dials are archived
-- JSON import/export supports settings, dials, and tabs+dials
+Server provides:
+- index.html
+- CSS
+- JavaScript
+- default-JSD.json
+
+Browser stores locally:
+- user tabs
+- user dials
+- settings
+- archive contents
+- imported JSON data
 ```
 
-## Home / repo button
+The app does not upload your tabs or dials. 
+Clearing browser site data or localStorage can remove your dashboard unless you exported a backup first.
 
-The `navHome` item opens the GitHub repository for this project:
+Opening a dial naturally visits that dial’s target site, so that target site receives a normal browser visit.
 
-## Dialogs
+## Pinning
 
-Dialogs are created by JavaScript when needed.
+Pinned dials are stored once and projected onto every normal tab at the same row/column.
 
-The app does not use native `<dialog>` or `<form>` for the custom dialogs. This avoids browser/user-agent styling interference, especially in older or unusual browsers.
+When pinning would collide with an existing dial, the app tries to move the conflicting dial to a free slot. 
+If no free slot exists, pinning is blocked.
 
-Row and column selectors display human-friendly numbers, while stored data remains zero-based.
+## Archive
 
-## Pinning behavior
+The archive is a hidden system tab.
 
-Pinned dials are stored once in `allDials`.
+Deleted dials are moved into the archive. The archive keeps a fixed number of dials using FIFO behavior. 
+When full, the oldest archived dial is dropped.
 
-A pinned dial projects onto every non-archive tab at the same row/column.
-
-When pinning a dial:
-
-```text
-- The selected position must fit within the shared grid of all normal tabs
-- If a normal dial occupies the projected position on another tab, the app tries to move it
-- If no free fallback slot exists, pinning is blocked
-```
-
-Pinned dials show a CSS-drawn padlock icon.
-
-## Archive behavior
-
-The archive tab is a system tab.
-
-```text
-ARCHIVE r0 c0 = reserved explanation/placeholder
-ARCHIVE r0 c1 = newest archived dial
-ARCHIVE r0 c2 = previous archived dial
-...
-```
-
-Archive is FIFO. When full, the oldest archived dial is dropped.
+Archived dials can be restored to the active tab when a free slot exists, or deleted forever.
 
 ## JSON import / export
 
-The JSON dialog can:
+The JSON dialog supports:
 
 ```text
-- Export the current app data
+- Export current app data
 - Load JSON from a file
 - Paste JSON text
 - Import settings
+- Import tabs and dials
 - Import dials
-- Import tabs+dials
-- Import both settings and tabs+dials
+- Import both settings and tabs/dials
 ```
 
 ## Browser notes
 
-The app is intentionally plain JavaScript and should work broadly.
+The app intentionally uses plain JavaScript, plain CSS, and plain HTML.
 
 Known browser behavior:
+If a browser does not support native color inputs, it may show a plain text field instead.
 
 ```text
 input type=color may not show a native picker in Pale Moon
-Basilisk and LibreWolf handle it correctly in testing
+However Basilisk and LibreWolf handle it correctly in testing
 ```
 
-If a browser does not support native color inputs, it may show a plain text field instead.
-
-## File layout
+## Files
 
 ```text
 index.html

@@ -39,22 +39,28 @@ const delToArch = (pos) => {
 	return archDial(dial);
 };
 //==============================================================================
-const restoreFromArch = () => {
+const restoreFromArchPos = (pos) => {
 	const data = JSDStore.getData();
-	const archived = archList();
+	const archivedDial = JSDStore.dialAt(pos);
 	const tabId = JSDStore.getUsr().activeTabId;
 	const tab = JSDStore.tabById(tabId);
 	const res = { ok: true, mssgs: [] };
 
-	if (!archived.length) {return { ok: false, mssgs: ["Archive is empty"] };}
-	if (!tab || tab.tabId === archTabId) {return { ok: false, mssgs: ["No active user tab available"] };}
+	if (!archivedDial || archivedDial.position.tabId !== archTabId) {
+		return { ok: false, mssgs: ["No archived dial at selected position"] };
+	}
+	if (!tab || tab.tabId === archTabId) {
+		return { ok: false, mssgs: ["No active user tab available"] };
+	}
 
 	const targetPos = JSDPos.freePos(tab.tabId);
 
-	if (!targetPos) {return { ok: false, mssgs: ["No free slot on active tab: " + tab.tabId] };}
+	if (!targetPos) {
+		return { ok: false, mssgs: ["No free slot on active tab: " + tab.tabId] };
+	}
 
-	const dial = cloneData(archived[0]);
-	data.allDials = data.allDials.filter((oldDial) => !JSDPos.samePos(oldDial.position, archived[0].position));
+	const dial = cloneData(archivedDial);
+	data.allDials = data.allDials.filter((oldDial) => !JSDPos.samePos(oldDial.position, archivedDial.position));
 	dial.position = targetPos;
 	dial.pinned = false;
 	data.allDials.push(dial);
@@ -64,10 +70,32 @@ const restoreFromArch = () => {
 	return res;
 };
 //==============================================================================
+const restoreFromArch = () => {
+	const archived = archList();
+	if (!archived.length) {return { ok: false, mssgs: ["Archive is empty"] };}
+	return restoreFromArchPos(archived[0].position);
+};
+//==============================================================================
+const deleteFromArchPos = (pos) => {
+	const data = JSDStore.getData();
+	const dial = JSDStore.dialAt(pos);
+
+	if (!dial || dial.position.tabId !== archTabId) {
+		return { ok: false, mssgs: ["No archived dial at selected position"] };
+	}
+
+	data.allDials = data.allDials.filter((oldDial) => !JSDPos.samePos(oldDial.position, dial.position));
+	JSDStore.commit();
+
+	return { ok: true, mssgs: ["Deleted forever: " + dial.label] };
+};
+//==============================================================================
 const JSDArch = {
 	archList: archList,
 	archSize: archSize,
 	archDial: archDial,
 	delToArch: delToArch,
-	restoreFromArch: restoreFromArch
+	restoreFromArch: restoreFromArch,
+	restoreFromArchPos: restoreFromArchPos,
+	deleteFromArchPos: deleteFromArchPos
 };
