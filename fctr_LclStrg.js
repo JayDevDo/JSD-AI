@@ -1,6 +1,6 @@
 /*
 	fctr_LclStrg.js
-	Version = 20260521-test
+	Version = 20260525
 	Rules:
 	- Tabs are identified by tabId.
 	- tabId is the visible tab name.
@@ -97,6 +97,12 @@ const getTabs = () => appData.allTabs;
 const getDials = () => appData.allDials;
 //==============================================================================
 const saveUsr = (usr) => {
+	appData.userSettings = Object.assign({}, appData.userSettings, usr);
+	return saveData();
+};
+//==============================================================================
+const saveSettings = (sys, usr) => {
+	appData.systemSettings = Object.assign({}, appData.systemSettings, sys);
 	appData.userSettings = Object.assign({}, appData.userSettings, usr);
 	return saveData();
 };
@@ -278,6 +284,7 @@ const JSDStore = {
 	getTabs: getTabs,
 	getDials: getDials,
 	saveUsr: saveUsr,
+	saveSettings: saveSettings,
 	tabById: tabById,
 	dialAt: dialAt,
 	tabDials: tabDials,

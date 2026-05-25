@@ -1,6 +1,6 @@
 /*
 	fctr_Json.js
-	Version = 20260524
+	Version = 20260525
 */
 "use strict";
 //==============================================================================
@@ -119,7 +119,8 @@ const jsonSummary = (parts, tdChk) => {
 };
 //==============================================================================
 const analyseJson = (jsonText) => {
-	const data = JSON.parse(jsonText);
+	let data = JSON.parse(jsonText);
+	if (typeof JSDOldJson !== "undefined" && JSDOldJson.isOldJson(data)) {data = JSDOldJson.convertDataToImportJson(data);}
 	const parts = jsonParts(data);
 	const tdChk = parts.dials ? chkTabsDials(parts.tabs || JSDStore.getTabs(), parts.dials) : null;
 	return {

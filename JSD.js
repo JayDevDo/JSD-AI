@@ -1,6 +1,6 @@
 /*
 	JSD.js
-	Version = 20260524
+	Version = 20260525
 */
 "use strict";
 //==============================================================================
@@ -69,7 +69,6 @@ const updAddBtn = () => {
 const setView = (view) => {
 	getElm("app").classList.remove("vView", "hView");
 	getElm("app").classList.add(view);
-	getElm("toggleBtn").textContent = view === "vView" ? "tabs on top" : "tabs left";
 	JSDStore.saveUsr({ view: view });
 };
 //==============================================================================
@@ -81,14 +80,6 @@ const updNavHome = (tab) => {
 //==============================================================================
 const openHome = () => {
 	window.open(homePageUrl, "_blank");
-};
-//==============================================================================
-const togView = () => {
-	if (JSDStore.getUsr().view === "vView") {
-		setView("hView");
-		return;
-	}
-	setView("vView");
 };
 //==============================================================================
 const getActTab = () => {
@@ -199,9 +190,9 @@ const renderApp = () => {
 //==============================================================================
 const wireHome = () => {
 	getElm("navHome").addEventListener("click", openHome);
-	getElm("toggleBtn").addEventListener("click", togView);
 	getElm("addTabBtn").addEventListener("click", () => openTabDialog());
 	getElm("jsonBtn").addEventListener("click", () => openJsonDialog());
+	getElm("settingsBtn").addEventListener("click", () => openSettingsDialog());
 };
 //==============================================================================
 const initApp = async () => {
