@@ -1,25 +1,19 @@
 /*
 	fctr_Positioning.js
-	Version = 20260524
-	Rules:
-	- Owns position, collision, pin, and move planning logic.
-	- Reads app data through JSDStore.
-	- May mutate in-memory dial positions.
-	- Does not write localStorage.
-	- Does not render UI.
+	Version = 20260526
 */
 "use strict";
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const samePos = (posA, posB) => posA.tabId === posB.tabId && posA.row === posB.row && posA.col === posB.col;
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const sameCell = (posA, posB) => posA.row === posB.row && posA.col === posB.col;
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const skipPosMatch = (dialPos, skipPos) => {
 	if (!skipPos) {return false;}
 	if (!Array.isArray(skipPos)) {return samePos(dialPos, skipPos);}
 	return skipPos.some((pos) => samePos(dialPos, pos));
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const posTaken = (pos, skipPos = null, pinPos = null) => {
 	const normalTab = pos.tabId !== archTabId;
 	if (pinPos && normalTab && sameCell(pinPos, pos)) {return true;}
@@ -30,7 +24,7 @@ const posTaken = (pos, skipPos = null, pinPos = null) => {
 	}
 	return false;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const getPins = () => {
 	const pins = [];
 	for (const dial of JSDStore.getDials()) {
@@ -38,7 +32,7 @@ const getPins = () => {
 	}
 	return pins;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const freeSlots = (tabId, skipPos = null, rows = null, cols = null, pinPos = null) => {
 	const tab = JSDStore.tabById(tabId);
 	const slots = [];
@@ -50,9 +44,9 @@ const freeSlots = (tabId, skipPos = null, rows = null, cols = null, pinPos = nul
 	}
 	return slots;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const posDist = (posA, posB) => Math.abs(posA.row - posB.row) + Math.abs(posA.col - posB.col);
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const sortByDist = (slots, fromPos) => {
 	return slots.slice().sort((posA, posB) => {
 		const distA = posDist(posA, fromPos);
@@ -62,19 +56,19 @@ const sortByDist = (slots, fromPos) => {
 		return posA.col - posB.col;
 	});
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const tabHasFree = (tabId, skipPos = null) => freeSlots(tabId, skipPos).length > 0;
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const freePos = (tabId, skipPos = null, rows = null, cols = null, pinPos = null) => {
 	const slots = freeSlots(tabId, skipPos, rows, cols, pinPos);
 	return slots.length ? slots[0] : null;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const freePosClosest = (tabId, fromPos, skipPos = null, rows = null, cols = null, pinPos = null) => {
 	const slots = sortByDist(freeSlots(tabId, skipPos, rows, cols, pinPos), fromPos);
 	return slots.length ? slots[0] : null;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const sharedGrid = () => {
 	let rows = null;
 	let cols = null;
@@ -84,7 +78,7 @@ const sharedGrid = () => {
 	}
 	return { rows: rows || 0, cols: cols || 0 };
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const pinCellUsed = (pos, oldPos = null) => {
 	for (const dial of JSDStore.getDials()) {
 		if (oldPos && samePos(dial.position, oldPos)) {continue;}
@@ -92,14 +86,14 @@ const pinCellUsed = (pos, oldPos = null) => {
 	}
 	return false;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const pinTargetFor = (fromPos, oldPos = null) => {
 	const grid = sharedGrid();
 	if (fromPos.tabId === archTabId || fromPos.row >= grid.rows || fromPos.col >= grid.cols) {return null;}
 	if (pinCellUsed(fromPos, oldPos)) {return null;}
 	return fromPos;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const pinMovePlan = (dial, oldPos = null) => {
 	const res = { ok: true, mssgs: [], moves: [] };
 	if (!pinTargetFor(dial.position, oldPos)) {
@@ -116,7 +110,7 @@ const pinMovePlan = (dial, oldPos = null) => {
 	}
 	return res;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const pinOK = (dial, oldPos = null) => {
 	if (!dial.pinned) {return { ok: true, mssgs: [] };}
 	const oldDial = oldPos ? JSDStore.dialAt(oldPos) : null;
@@ -128,7 +122,7 @@ const pinOK = (dial, oldPos = null) => {
 	}
 	return pinMovePlan(dial, oldPos);
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const moveForPin = (dial, oldPos = null) => {
 	const res = pinMovePlan(dial, oldPos);
 	if (!res.ok) {return res;}
@@ -138,7 +132,7 @@ const moveForPin = (dial, oldPos = null) => {
 	}
 	return res;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const moveOut = (tab, rows, cols) => {
 	const res = { ok: true, mssgs: [] };
 	for (const dial of JSDStore.tabDials(tab.tabId).slice()) {
@@ -154,7 +148,7 @@ const moveOut = (tab, rows, cols) => {
 	}
 	return res;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const JSDPos = {
 	samePos: samePos,
 	sameCell: sameCell,

@@ -1,57 +1,33 @@
 /*
 	fctr_Json.js
-	Version = 20260525
+	Version = 20260526
 */
 "use strict";
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const jsonParts = (data) => {
 	const parts = { settings: null, tabs: null, dials: null };
 	if (data.systemSettings || data.userSettings) {
 		parts.settings = {};
-		if (data.systemSettings) {
-			parts.settings.systemSettings = data.systemSettings;
-		}
-		if (data.userSettings) {
-			parts.settings.userSettings = data.userSettings;
-		}
+		if (data.systemSettings) {parts.settings.systemSettings = data.systemSettings;}
+		if (data.userSettings) {parts.settings.userSettings = data.userSettings;}
 	}
 	if (data.settings) {
 		parts.settings = parts.settings || {};
-		if (data.settings.systemSettings) {
-			parts.settings.systemSettings = data.settings.systemSettings;
-		}
-		if (data.settings.userSettings) {
-			parts.settings.userSettings = data.settings.userSettings;
-		}
-		if (!data.settings.systemSettings && !data.settings.userSettings) {
-			parts.settings.userSettings = data.settings;
-		}
+		if (data.settings.systemSettings) {parts.settings.systemSettings = data.settings.systemSettings;}
+		if (data.settings.userSettings) {parts.settings.userSettings = data.settings.userSettings;}
+		if (!data.settings.systemSettings && !data.settings.userSettings) {parts.settings.userSettings=data.settings;}
 	}
-	if (Array.isArray(data.allTabs)) {
-		parts.tabs = data.allTabs;
-	}
-	if (Array.isArray(data.tabs)) {
-		parts.tabs = data.tabs;
-	}
-	if (Array.isArray(data.allDials)) {
-		parts.dials = data.allDials;
-	}
-	if (Array.isArray(data.dials)) {
-		parts.dials = data.dials;
-	}
+	if (Array.isArray(data.allTabs)) {parts.tabs = data.allTabs;}
+	if (Array.isArray(data.tabs)) {	parts.tabs = data.tabs;	}
+	if (Array.isArray(data.allDials)) {	parts.dials = data.allDials;}
+	if (Array.isArray(data.dials)) {parts.dials = data.dials;}
 	return parts;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const jsonUserTabs = (tabs) => tabs.filter((tab) => tab.tabId !== archTabId);
-//==============================================================================
-const jsonTabMap = (tabs) => {
-	const map = {};
-	for (const tab of tabs) {
-		map[tab.tabId] = tab;
-	}
-	return map;
-};
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+const jsonTabMap = (tabs) => {const map = {};for (const tab of tabs) {map[tab.tabId] = tab;}return map;};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const chkTabsDials = (tabs, dials) => {
 	const res = { ok: true, mssgs: [] };
 	const maxTabs = JSDStore.getSys().maxTabs - 1;
@@ -91,7 +67,7 @@ const chkTabsDials = (tabs, dials) => {
 	}
 	return res;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const jsonSummary = (parts, tdChk) => {
 	const found = [
 		parts.settings ? "settings" : null,
@@ -117,7 +93,7 @@ const jsonSummary = (parts, tdChk) => {
 	}
 	return lines.join("\n");
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const analyseJson = (jsonText) => {
 	let data = JSON.parse(jsonText);
 	if (typeof JSDOldJson !== "undefined" && JSDOldJson.isOldJson(data)) {data = JSDOldJson.convertDataToImportJson(data);}
@@ -130,41 +106,31 @@ const analyseJson = (jsonText) => {
 		mssg: jsonSummary(parts, tdChk)
 	};
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const importSettings = (parts) => {
 	const data = {};
-	if (parts.settings.systemSettings) {
-		data.systemSettings = parts.settings.systemSettings;
-	}
-	if (parts.settings.userSettings) {
-		data.userSettings = parts.settings.userSettings;
-	}
+	if (parts.settings.systemSettings) {data.systemSettings = parts.settings.systemSettings;}
+	if (parts.settings.userSettings) {data.userSettings = parts.settings.userSettings;}
 	JSDStore.replUsr(data);
 	return ["settings imported"];
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const importTabsDials = (parts) => {
-	if (parts.tabs) {
-		return JSDStore.replTabsDials(parts.tabs, parts.dials).mssgs;
-	}
+	if (parts.tabs) {return JSDStore.replTabsDials(parts.tabs, parts.dials).mssgs;}
 	return JSDStore.replDials(parts.dials).mssgs;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const importMode = (mode, parts, tdChk) => {
 	const msgs = [];
-	if (mode === "settings" && parts && parts.settings) {
-		msgs.push(importSettings(parts).join("\n"));
-	}
-	if (mode === "tabsDials" && parts && parts.dials && tdChk && tdChk.ok) {
-		msgs.push(importTabsDials(parts).join("\n"));
-	}
+	if (mode === "settings" && parts && parts.settings) {msgs.push(importSettings(parts).join("\n"));}
+	if (mode === "tabsDials" && parts && parts.dials && tdChk && tdChk.ok) {msgs.push(importTabsDials(parts).join("\n"));}
 	if (mode === "both" && parts && parts.settings && parts.dials && tdChk && tdChk.ok) {
 		msgs.push(importSettings(parts).join("\n"));
 		msgs.push(importTabsDials(parts).join("\n"));
 	}
 	return msgs;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const JSDJson = {
 	analyseJson: analyseJson,
 	importMode: importMode

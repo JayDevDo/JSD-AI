@@ -17,7 +17,7 @@ https://jaydevdo.github.io/JSD-AI/
 Development snapshot.
 
 ```text
-version: 1.0.5
+version: 1.0.6
 storage: localStorage
 layout: vertical / horizontal
 dialogs: JavaScript-built

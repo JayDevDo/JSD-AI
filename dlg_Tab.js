@@ -1,9 +1,9 @@
 /*
 	dlg_Tab.js
-	Version = 20260521-test
+	Version = 20260526
 */
 "use strict";
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const openTabDialog = (tab = null) => {
 	const appData = JSDStore.getData();
 	const sys = JSDStore.getSys();
@@ -53,18 +53,12 @@ const openTabDialog = (tab = null) => {
 		workTab.bgColor = bgInput.value;
 		workTab.txtColor = txtInput.value;
 		const res = JSDStore.saveTab(workTab, oldId);
-		if (res.ok) {
-			renderApp(appData);
-			dialog.remove();
-		}
+		if (res.ok) {renderApp(appData);dialog.remove();}
 		if (typeof showMssgs === "function") {showMssgs(res.mssgs);}
 	});
 	delBtn.addEventListener("click", () => {
 		const res = JSDStore.delTab(oldId);
-		if (res.ok) {
-			renderApp(appData);
-			dialog.remove();
-		}
+		if (res.ok) {renderApp(appData);dialog.remove();}
 		if (typeof showMssgs === "function") {showMssgs(res.mssgs);}
 	});
 	cancelBtn.addEventListener("click", () => dialog.remove());

@@ -1,13 +1,13 @@
 /*
 	fctr_Archive.js
-	Version = 20260525
+	Version = 20260526
 */
 "use strict";
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const archList = () => JSDStore.tabDials(archTabId);
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const archSize = () => archList().length;
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const archDial = (dial) => {
 	const data = JSDStore.getData();
 	const tab = JSDStore.tabById(archTabId);
@@ -32,32 +32,25 @@ const archDial = (dial) => {
 	if (fifo.length) {res.mssgs.push("Archive full, dropped: " + fifo[0].label);}
 	return res;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const delToArch = (pos) => {
 	const dial = JSDStore.dialAt(pos);
 	if (!dial) {return { ok: false, mssgs: ["No dial at selected position"] };}
 	return archDial(dial);
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const restoreFromArchPos = (pos) => {
 	const data = JSDStore.getData();
 	const archivedDial = JSDStore.dialAt(pos);
 	const tabId = JSDStore.getUsr().activeTabId;
 	const tab = JSDStore.tabById(tabId);
 	const res = { ok: true, mssgs: [] };
-
 	if (!archivedDial || archivedDial.position.tabId !== archTabId) {
 		return { ok: false, mssgs: ["No archived dial at selected position"] };
 	}
-	if (!tab || tab.tabId === archTabId) {
-		return { ok: false, mssgs: ["No active user tab available"] };
-	}
-
+	if (!tab || tab.tabId === archTabId) {return { ok: false, mssgs: ["No active user tab available"] };}
 	const targetPos = JSDPos.freePos(tab.tabId);
-
-	if (!targetPos) {
-		return { ok: false, mssgs: ["No free slot on active tab: " + tab.tabId] };
-	}
+	if (!targetPos) {return { ok: false, mssgs: ["No free slot on active tab: " + tab.tabId] };	}
 
 	const dial = cloneData(archivedDial);
 	data.allDials = data.allDials.filter((oldDial) => !JSDPos.samePos(oldDial.position, archivedDial.position));
@@ -65,31 +58,25 @@ const restoreFromArchPos = (pos) => {
 	dial.pinned = false;
 	data.allDials.push(dial);
 	JSDStore.commit();
-
 	res.mssgs.push("Restored: " + dial.label + " to " + tab.tabId + " r" + targetPos.row + " c" + targetPos.col);
 	return res;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const restoreFromArch = () => {
 	const archived = archList();
 	if (!archived.length) {return { ok: false, mssgs: ["Archive is empty"] };}
 	return restoreFromArchPos(archived[0].position);
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const deleteFromArchPos = (pos) => {
 	const data = JSDStore.getData();
 	const dial = JSDStore.dialAt(pos);
-
-	if (!dial || dial.position.tabId !== archTabId) {
-		return { ok: false, mssgs: ["No archived dial at selected position"] };
-	}
-
+	if (!dial || dial.position.tabId !== archTabId) {return { ok: false, mssgs: ["No archived dial at selected position"] };}
 	data.allDials = data.allDials.filter((oldDial) => !JSDPos.samePos(oldDial.position, dial.position));
 	JSDStore.commit();
-
 	return { ok: true, mssgs: ["Deleted forever: " + dial.label] };
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const JSDArch = {
 	archList: archList,
 	archSize: archSize,

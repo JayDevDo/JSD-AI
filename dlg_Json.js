@@ -1,14 +1,11 @@
 /*
 	dlg_Json.js
-	Version = 20260524
+	Version = 20260526
 */
 "use strict";
-//==============================================================================
-const jsonMsg = (elm, text) => {
-	elm.textContent = text;
-	console.info(text);
-};
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+const jsonMsg = (elm, text) => {elm.textContent = text;console.info(text);};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const openJsonDialog = () => {
 	let importParts = null;
 	let tdChk = null;
@@ -49,22 +46,12 @@ const openJsonDialog = () => {
 		}
 		showBtns();
 	};
-	const closeDialog = () => {
-		renderApp();
-		dialog.remove();
-	};
+	const closeDialog = () => {	renderApp();dialog.remove();};
 	const doImport = (mode) => {
-		if (jsonText.value.length === 0) {
-			jsonText.focus();
-			jsonMsg(mssg, "Paste JSON first.");
-			return;
-		}
+		if (jsonText.value.length === 0) {jsonText.focus();	jsonMsg(mssg, "Paste JSON first.");	return;	}
 		analyseText();
 		const msgs = JSDJson.importMode(mode, importParts, tdChk);
-		if (!msgs.length) {
-			jsonMsg(mssg, "Selected import is not valid.");
-			return;
-		}
+		if (!msgs.length) {	jsonMsg(mssg, "Selected import is not valid.");	return;	}
 		showMssgs(msgs);
 		closeDialog();
 	};
@@ -118,9 +105,7 @@ const openJsonDialog = () => {
 	tdBtn.addEventListener("click", () => doImport("tabsDials"));
 	bothBtn.addEventListener("click", () => doImport("both"));
 	cancelBtn.addEventListener("click", closeDialog);
-	dialog.addEventListener("keydown", (event) => {
-		if (event.key === "Escape") {closeDialog();}
-	});
+	dialog.addEventListener("keydown", (event) => {	if (event.key === "Escape") {closeDialog();}});
 	textWrap.appendChild(textLbl);
 	textWrap.appendChild(jsonText);
 	actions.appendChild(exportBtn);

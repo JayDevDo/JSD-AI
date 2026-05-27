@@ -1,28 +1,15 @@
 /*
 	fctr_LclStrg.js
-	Version = 20260525
-	Rules:
-	- Tabs are identified by tabId.
-	- tabId is the visible tab name.
-	- Dials are identified by position.
-	- Tab display order is stored in tab.order.
-	- allTabs array order is not trusted for display order.
-	- LocalStorage wins when present.
-	- Default data is used only when LocalStorage is empty.
-	- Init only repairs missing ARCHIVE tab.
-	- No jQuery.
-	- No data-*.
-	- No constructors.
-	- No generated position classes.
+	Version = 20260526
 */
 "use strict";
 const lsKey = "JSD.appData";
 const defFile = "default-JSD.json";
 const archTabId = "ARCHIVE";
 let appData = null;
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const cloneData = (value) => JSON.parse(JSON.stringify(value));
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const newTab = () => {
 	return {
 		tabId: "TAB" + appData.allTabs.length,
@@ -33,7 +20,7 @@ const newTab = () => {
 		order: appData.allTabs.length
 	};
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const newDial = (pos) => {
 	return {
 		label: "new dial",
@@ -45,13 +32,13 @@ const newDial = (pos) => {
 		lastClicked: ""
 	};
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const loadDefs = async () => {
 	const resp = await fetch(defFile, { cache: "no-store" });
 	if (!resp.ok) {throw new Error("Could not load " + defFile);}
 	return await resp.json();
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const readStore = () => {
 	const rawData = localStorage.getItem(lsKey);
 	if (!rawData) {return null;}
@@ -62,9 +49,9 @@ const readStore = () => {
 		return null;
 	}
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const writeStore = (data) => localStorage.setItem(lsKey, JSON.stringify(data));
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const initData = async () => {
 	const defs = await loadDefs();
 	const store = readStore();
@@ -80,71 +67,69 @@ const initData = async () => {
 	}
 	return appData;
 };
-//==============================================================================
-const saveData = () => {
-	writeStore(appData);
-	return appData;
-};
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+const saveData = () => {writeStore(appData);return appData;};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const getData = () => appData;
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const getSys = () => appData.systemSettings;
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const getUsr = () => appData.userSettings;
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const getTabs = () => appData.allTabs;
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const getDials = () => appData.allDials;
-//==============================================================================
-const saveUsr = (usr) => {
-	appData.userSettings = Object.assign({}, appData.userSettings, usr);
-	return saveData();
-};
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+const saveUsr = (usr) => {appData.userSettings = Object.assign({}, appData.userSettings, usr);return saveData();};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const saveSettings = (sys, usr) => {
 	appData.systemSettings = Object.assign({}, appData.systemSettings, sys);
 	appData.userSettings = Object.assign({}, appData.userSettings, usr);
 	return saveData();
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const tabIdx = (tabId) => {
-	for (let idx = 0; idx < appData.allTabs.length; idx++) {
-		if (appData.allTabs[idx].tabId === tabId) {return idx;}
-	}
+	for (let idx = 0; idx < appData.allTabs.length; idx++) {if (appData.allTabs[idx].tabId === tabId) {return idx;}	}
 	return -1;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const tabById = (tabId) => {
 	const idx = tabIdx(tabId);
 	if (idx === -1) {return null;}
 	return appData.allTabs[idx];
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const dialAt = (pos) => {
-	for (const dial of appData.allDials) {
-		if (JSDPos.samePos(dial.position, pos)) {return dial;}
-	}
+	for (const dial of appData.allDials) {if (JSDPos.samePos(dial.position, pos)) {return dial;}}
 	return null;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const tabDials = (tabId) => {
 	return appData.allDials.filter((dial) => dial.position.tabId === tabId).sort((dialA, dialB) => {
 		if (dialA.position.row !== dialB.position.row) {return dialA.position.row - dialB.position.row;}
 		return dialA.position.col - dialB.position.col;
 	});
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const sortTabs = (tabs) => tabs.slice().sort((tabA, tabB) => tabA.order - tabB.order);
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const usrTabs = () => appData.allTabs.filter((tab) => tab.tabId !== archTabId);
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+const getPinGridSize = () => {
+	const tabs = usrTabs();
+	return {
+		bottom: Math.min(...tabs.map(tab => tab.rows)) - 1,
+		right: Math.min(...tabs.map(tab => tab.cols)) - 1
+	};
+};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const tabsByOrd = () => sortTabs(usrTabs());
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const fixTabOrd = () => {
 	appData.allTabs = [tabById(archTabId)].concat(tabsByOrd());
 	for (let idx = 0; idx < appData.allTabs.length; idx++) {appData.allTabs[idx].order = idx;}
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const setTabOrd = (tabId, order) => {
 	const tab = tabById(tabId);
 	const tabs = tabsByOrd().filter((oldTab) => oldTab.tabId !== tabId);
@@ -152,7 +137,7 @@ const setTabOrd = (tabId, order) => {
 	appData.allTabs = [tabById(archTabId)].concat(tabs);
 	for (let idx = 0; idx < appData.allTabs.length; idx++) {appData.allTabs[idx].order = idx;}
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const saveDial = (dial, oldPos = null) => {
 	const chk = JSDPos.pinOK(dial, oldPos);
 	if (!chk.ok) {return chk;}
@@ -173,7 +158,17 @@ const saveDial = (dial, oldPos = null) => {
 	res.mssgs.push("Saved dial: " + dial.label);
 	return res;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+const moveDial = (oldPos, newPos) => {
+	const dial = dialAt(oldPos);
+	if (!dial) {return { ok: false, mssgs: ["Dial not found"] };}
+	if (dial.pinned) {return { ok: false, mssgs: ["Pinned dials cannot be moved"] };}
+	if (JSDPos.posTaken(newPos, oldPos)) {return { ok: false, mssgs: ["Position is taken"] };}
+	dial.position = cloneData(newPos);
+	saveData();
+	return { ok: true, mssgs: ["Moved dial: " + dial.label] };
+};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const saveTab = (tab, oldId = null) => {
 	const res = { ok: true, mssgs: [] };
 	for (const dial of JSDPos.getPins()) {
@@ -187,9 +182,7 @@ const saveTab = (tab, oldId = null) => {
 		res.mssgs = res.mssgs.concat(chk.mssgs);
 	}
 	if (oldId !== null && oldId !== tab.tabId) {
-		for (const dial of appData.allDials) {
-			if (dial.position.tabId === oldId) {dial.position.tabId = tab.tabId;}
-		}
+		for (const dial of appData.allDials) {if (dial.position.tabId === oldId) {dial.position.tabId = tab.tabId;}	}
 		if (appData.userSettings.activeTabId === oldId) {appData.userSettings.activeTabId = tab.tabId;}
 	}
 	const idx = tabIdx(oldId || tab.tabId);
@@ -200,7 +193,7 @@ const saveTab = (tab, oldId = null) => {
 	res.mssgs.push("Saved tab: " + tab.tabId);
 	return res;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const delTab = (tabId) => {
 	const idx = tabIdx(tabId);
 	const res = { ok: true, mssgs: [] };
@@ -218,25 +211,22 @@ const delTab = (tabId) => {
 	res.mssgs.push("Deleted tab: " + tabId);
 	return res;
 };
-//==============================================================================
-const setActTab = (tabId) => {
-	appData.userSettings.activeTabId = tabId;
-	return saveData();
-};
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+const setActTab = (tabId) => {appData.userSettings.activeTabId = tabId;	return saveData();};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const setLastClk = (pos) => {
 	const dial = dialAt(pos);
 	if (dial) {dial.lastClicked = new Date().toISOString();}
 	return saveData();
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const makePos = (tabId, row, col) => {return { tabId: tabId, row: row, col: col };};
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const exportJson = (pretty = true) => {
 	if (pretty) {return JSON.stringify(appData, null, "\t");}
 	return JSON.stringify(appData);
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const replDials = (dials) => {
 	const oldDials = appData.allDials.length;
 	const res = { ok: true, mssgs: [] };
@@ -253,7 +243,7 @@ const replDials = (dials) => {
 	res.mssgs.unshift("dials replaced: " + oldDials + " -> " + appData.allDials.length);
 	return res;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const replTabsDials = (tabs, dials) => {
 	const oldTabs = usrTabs().length;
 	const res = { ok: true, mssgs: [] };
@@ -266,7 +256,7 @@ const replTabsDials = (tabs, dials) => {
 	res.mssgs.unshift("user tabs replaced: " + oldTabs + " -> " + usrTabs().length);
 	return res;
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const replUsr = (data) => {
 	if (data.systemSettings) {appData.systemSettings = cloneData(data.systemSettings);}
 	if (data.userSettings) {appData.userSettings = cloneData(data.userSettings);}
@@ -274,7 +264,7 @@ const replUsr = (data) => {
 	if (data.allDials) {appData.allDials = cloneData(data.allDials);}
 	return saveData();
 };
-//==============================================================================
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const JSDStore = {
 	initData: initData,
 	commit: saveData,
@@ -289,9 +279,11 @@ const JSDStore = {
 	dialAt: dialAt,
 	tabDials: tabDials,
 	usrTabs: usrTabs,
+	getPinGridSize: getPinGridSize,
 	tabsByOrd: tabsByOrd,
 	saveTab: saveTab,
 	saveDial: saveDial,
+	moveDial: moveDial,
 	delTab: delTab,
 	setActTab: setActTab,
 	setLastClk: setLastClk,

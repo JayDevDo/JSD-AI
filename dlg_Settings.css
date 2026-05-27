@@ -8,34 +8,40 @@
 	z-index: 999;
 	box-sizing: border-box;
 }
-#settingsDlg[hidden] {
-	display: none;
-}
-#settingsDlg, #settingsDlg * {
+
+#settingsDlg,
+#settingsDlg * {
 	box-sizing: border-box;
 	font: inherit;
 }
-#settingsDlgPanel {
-	display: grid;
-	grid-template-columns: auto 1fr;
-	grid-auto-rows: min-content;
-	gap: 4px;
+
+#settingsDlg > table {
+	border-collapse: separate;
+	border-spacing: 18px 12px;
 	padding: 10px;
 	border: 1px solid #444444;
 	background: #222222;
 	color: #ffffff;
-	width: min(760px, 92vw);
+	width: min(920px, 94vw);
 	min-width: 260px;
 	max-height: 88vh;
-	overflow: hidden;
 }
-#settingsDlgPanel h2 {
-	grid-column: 1 / -1;
-	margin: 0 0 10px 0;
+
+#settingsDlg caption {
+	caption-side: top;
+	padding-bottom: 8px;
 	text-align: center;
 	font-size: 1.45em;
 	font-weight: 800;
+	color: #ffffff;
 }
+
+#settingsDlg td {
+	vertical-align: top;
+	padding: 0;
+	width: 50%;
+}
+
 #settingsDlg button,
 #settingsDlg input,
 #settingsDlg select,
@@ -46,26 +52,24 @@
 	color: #ffffff;
 	padding: 2px 6px;
 }
+
 #settingsDlg button {
 	cursor: pointer;
+	white-space: nowrap;
 }
-.settings-layout {
-	grid-column: 1 / -1;
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-	gap: 18px;
-	align-items: start;
-	min-width: 0;
+
+#settingsDlg input[type="number"],
+#settingsDlg select {
+	width: 7ch;
 }
-.settings-stack {
-	display: grid;
-	grid-auto-rows: min-content;
-	gap: 14px;
-	align-content: start;
-	min-width: 0;
-	overflow: hidden;
+
+#settingsDlg #setTheme {
+	width: 12ch;
 }
-.settings-block {
+
+.settingsBlock,
+.rdOnlyBlock,
+#settingsDlg td > div {
 	display: grid;
 	grid-auto-rows: min-content;
 	gap: 4px;
@@ -73,128 +77,137 @@
 	min-width: 0;
 	overflow: hidden;
 }
-.settings-block-title {
-	grid-column: 1 / -1;
+
+.settingsBlock h3,
+.rdOnlyBlock h3,
+#settingsDlg td > div > h3 {
 	margin: 0 0 4px 0;
 	font-size: 1.15em;
 	font-weight: bold;
 	color: #f8e45c;
 }
-.settings-section-title {
-	grid-column: 1 / -1;
-	margin-top: 6px;
-	font-size: 1.15em;
-	font-weight: bold;
-	color: #f8e45c;
-}
-.settings-cell {
-	display: grid;
-	align-items: center;
-	min-height: 24px;
-}
-.settings-readonly {
-	min-width: 7ch;
-	padding: 2px 0;
-	color: #aaaaaa;
-	opacity: 0.75;
-}
-.settings-readonly-cell {
-	color: #aaaaaa;
-	opacity: 0.75;
-}
-.settings-empty {
-	min-width: 7ch;
-}
-.settings-small-field {
-	width: 7ch;
-}
-.settings-select {
-	width: 12ch;
-}
-.settings-grid {
+
+.settingsRow {
 	display: grid;
 	grid-template-columns: max-content min-content min-content;
-	gap: 4px 10px;
-	align-items: center;
-	min-width: 0;
-}
-.settings-grid-hdr {
-	font-weight: bold;
-}
-.settings-ro-grid {
-	display: grid;
-	grid-template-columns: max-content min-content;
-	gap: 4px 10px;
-	align-items: center;
-	min-width: 0;
-}
-.settings-user-grid {
-	display: grid;
-	grid-template-columns: max-content min-content max-content min-content;
 	gap: 4px 8px;
 	align-items: center;
+	min-height: 24px;
 	min-width: 0;
 }
-.settings-full-row {
-	grid-column: 1 / -1;
-}
-.settings-contrast-pair {
+
+.settingsLabel {
 	display: grid;
-	grid-template-columns: min-content min-content;
-	gap: 4px;
 	align-items: center;
+	white-space: nowrap;
+	color: #ffffff;
+}
+
+.settingsValue {
+	display: grid;
+	align-items: center;
+	min-width: 7ch;
+	white-space: nowrap;
+}
+
+.usrSettingsBlock .contrastRow {
+	grid-template-columns: max-content 7ch max-content 7ch max-content;
+}
+
+.usrSettingsBlock .contrastRow .settingsLabel:not(:first-child) {
+	color: #aaaaaa;
+	opacity: 0.75;
+}
+
+.sysContrastLimit {
+	color: #aaaaaa;
+	opacity: 0.75;
+}
+
+.sysSettingsBlock .settingsRow {
+	grid-template-columns: 11ch 7ch 7ch;
+}
+
+.sysSettingsBlock .settingsLabel {
+	width: 11ch;
+}
+
+.sysSettingsBlock .settingsValue {
+	width: 7ch;
+	min-width: 7ch;
+}
+
+.sysSettingsBlock select {
+	width: 7ch;
+}
+
+.sysHdrRow .settingsLabel,
+.sysHdrRow .settingsValue {
+	font-weight: bold;
+}
+
+.rdMaxPinsRow {
+	grid-template-columns: max-content min-content max-content;
+}
+
+.pinGridRow {
+	display: inline-grid;
+	grid-template-columns: max-content max-content;
+	gap: 4px 8px;
+	align-items: center;
+	width: max-content;
+	border: 2px solid #66CCFF;
+	padding: 1px 6px;
+}
+
+.pinGridRow .settingsLabel,
+.pinGridRow .settingsValue {
+	color: #66CCFF;
+}
+
+.pinGridRow .settingsValue {
+	width: max-content;
 	min-width: 0;
 }
-.settings-archive-table {
-	grid-column: 1 / -1;
-	width: 100%;
-	max-width: 100%;
+
+.archiveList {
+	display: grid;
+	grid-auto-rows: min-content;
+	gap: 2px;
 	min-width: 0;
-	height: 84px;
-	min-height: 84px;
-	max-height: 84px;
+	max-height: 174px;
 	overflow-y: auto;
 	overflow-x: hidden;
 	border: 1px solid #444444;
 	background: #111111;
-	box-sizing: border-box;
 }
-.settings-archive-head {
-	position: sticky;
-	top: 0;
-	z-index: 1;
+
+.archiveRow {
 	display: grid;
-	grid-template-columns: 7ch minmax(0, 1fr);
-	background: #181818;
-	color: #cccccc;
-	border-bottom: 1px solid #444444;
-	font-weight: bold;
+	grid-template-columns: 4ch minmax(0, 1fr) min-content min-content;
+	gap: 4px;
+	align-items: center;
 	min-width: 0;
-}
-.settings-archive-body {
-	display: grid;
-	grid-auto-rows: min-content;
-	min-width: 0;
-}
-.settings-archive-row {
-	display: grid;
-	grid-template-columns: 7ch minmax(0, 1fr);
-	min-width: 0;
-}
-.settings-archive-empty-row {
-	display: grid;
-	grid-template-columns: 1fr;
-	min-width: 0;
-}
-.settings-archive-cell {
 	padding: 2px 4px;
+}
+
+.archiveOrder,
+.archiveLabel {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	min-width: 0;
 }
+
+.archiveOrder {
+	color: #aaaaaa;
+}
+
+.archiveLabel {
+	color: #ffffff;
+}
+
 #settingsDlg .dialogActions {
-	grid-column: 1 / -1;
 	display: grid;
 	grid-auto-flow: column;
 	grid-auto-columns: min-content;
