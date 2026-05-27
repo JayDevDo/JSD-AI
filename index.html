@@ -1,30 +1,28 @@
 <!DOCTYPE html>
 <html lang = "en">
 <head>
-	<meta charset = "utf-8">
-	<meta name = "viewport" content = "width=device-width, initial-scale=1">
-	<title>JSD 260526 1.0.6</title>
+	<meta charset = "UTF-8">
+	<meta name = "viewport" content = "width=device-width, initial-scale=1.0">
+	<title>JSD-AI</title>
 	<link rel = "stylesheet" href = "JSD.css">
-	<link rel = "stylesheet" href = "dlg_Settings.css">
+	<link rel = "stylesheet" href = "dialogs.css">
 	<script defer src = "fctr_LclStrg.js"></script>
 	<script defer src = "fctr_Positioning.js"></script>
 	<script defer src = "fctr_Archive.js"></script>
 	<script defer src = "fctr_jsonConvert.js"></script>
 	<script defer src = "fctr_Json.js"></script>
-	<script defer src = "dlg_Tab.js"></script>
-	<script defer src = "dlg_Dial.js"></script>
-	<script defer src = "dlg_Json.js"></script>
-	<script defer src = "dlg_Settings.js"></script>
 	<script defer src = "JSD.js"></script>
+	<script defer src = "dialogs.js"></script>
 </head>
 <body>
-	<div id = "app" class = "vView">
-		<div id = "navHome" class = "tab"></div>
-		<div id = "navTabs"></div>
+	<div id = "app">
+		<div id = "navTabs">
+			<button id = "navHome" class = "tab" type = "button">JSD</button>
+		</div>
 		<div id = "dialGrid"></div>
 		<div id = "navBttns">
-			<button id = "addTabBtn">+Tab</button>
-			<button id = "settingsBtn">settings</button>
+			<button id = "addTabBtn" type = "button">+Tab</button>
+			<button id = "settingsBtn" type = "button">Settings</button>
 		</div>
 	</div>
 </body>

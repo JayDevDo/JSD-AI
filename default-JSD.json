@@ -27,6 +27,7 @@
 		],
 		"theme": "dark",
 		"view": "vView",
+		"showAddDials": true,
 		"activeTabId": "HOME"
 	},
 	"allTabs": [

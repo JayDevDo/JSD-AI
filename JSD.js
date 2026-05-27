@@ -1,8 +1,11 @@
 /*
 	JSD.js
-	Version = 20260526
+	Version = 20260527
 */
 "use strict";
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// JSD.js must load before dialogs.js.
+// Shared DOM helpers below are used by both JSD.js and dialogs.js.
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const homePageUrl = "https://github.com/JayDevDo/JSD-AI";
 let dragDialPos = null;
@@ -10,13 +13,13 @@ let navHomeMsgTmr = null;
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const getElm = (elmId) => document.getElementById(elmId);
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const clearElm = (elm) => {	while (elm.firstChild) {elm.removeChild(elm.firstChild);}};
+const clearElm = (elm) => {while (elm.firstChild) {elm.removeChild(elm.firstChild);}};
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const makeElement = (tag, opts = {}) => {
 	const elm = document.createElement(tag);
 	if (opts.id) {elm.id = opts.id;}
 	if (opts.className) {elm.className = opts.className;}
-	if (opts.textContent) {elm.textContent = opts.textContent;}
+	if (opts.textContent !== undefined) {elm.textContent = opts.textContent;}
 	return elm;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -36,26 +39,29 @@ const makeColorInput = (elmId, value) => {
 	return input;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const makeNumSelect = (elmId, minVal, maxVal, selVal) => {
-	const select = makeElement("select", { id: elmId });
-	for (let val = minVal; val <= maxVal; val++) {
-		const option = makeElement("option", { textContent: val.toString() });
-		option.value = val.toString();
-		option.selected = val === selVal;
+const makeButton = (text, cb = null, elmId = "") => {
+	const bttn = makeElement("button", { id: elmId, textContent: text });
+	bttn.type = "button";
+	if (cb) {bttn.addEventListener("click", cb);}
+	return bttn;
+};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+const makeSelect = (elmId = "", values = [], selectedValue = null, className = "") => {
+	const select = makeElement("select", { id: elmId, className: className });
+	for (const value of values) {
+		const valueText = value.toString();
+		const option = makeElement("option", { textContent: valueText });
+		option.value = valueText;
+		option.selected = selectedValue !== null && valueText === selectedValue.toString();
 		select.appendChild(option);
 	}
 	return select;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const makeNumberSelect = (elmId, minVal, maxVal, selVal) => makeNumSelect(elmId, minVal, maxVal, selVal);
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const makeDialogRow = (labelTxt, input) => {
-	const row = makeElement("div", { className: "dialogRow" });
-	const label = makeElement("label", { textContent: labelTxt });
-	label.htmlFor = input.id;
-	row.appendChild(label);
-	row.appendChild(input);
-	return row;
+const makeNumberSelect = (elmId, minVal, maxVal, selVal) => {
+	const values = [];
+	for (let val = minVal; val <= maxVal; val++) {values.push(val);}
+	return makeSelect(elmId, values, selVal);
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const showMssgs = (mssgs) => {for (const mssg of mssgs) {console.info(mssg);}};
@@ -105,14 +111,14 @@ const dialForPos = (pos) => {
 	return JSDStore.dialAt(pos);
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const openDial = (dial) => {JSDStore.setLastClk(dial.position);	window.open(dial.url, "_blank"); };
+const openDial = (dial) => {JSDStore.setLastClk(dial.position);window.open(dial.url, "_blank");};
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const moveDraggedDial = (pos) => {
 	if (!dragDialPos) {return;}
 	const res = JSDStore.moveDial(dragDialPos, pos);
 	dragDialPos = null;
 	updNavHome(getActTab());
-	if (typeof showMssgs === "function") {showMssgs(res.mssgs);}
+	showMssgs(res.mssgs);
 	if (res.ok) {buildTabGrid();}
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -120,6 +126,7 @@ const addDialBtn = (tab, pos) => {
 	const bttn = makeElement("button", { className: "addDial", textContent: "Add Dial" });
 	bttn.style.background = tab.bgColor;
 	bttn.style.color = tab.txtColor;
+	if (!JSDStore.getUsr().showAddDials) {bttn.classList.add("addDialHidden");}
 	bttn.addEventListener("click", () => openDialDialog(pos));
 	bttn.addEventListener("dragover", (evt) => {
 		if (!dragDialPos) {return;}
@@ -144,7 +151,7 @@ const dialBttn = (dial) => {
 	menuBtn.addEventListener("click", () => openDialDialog(dial.position, dial));
 	item.addEventListener("dragover", () => {
 		if (!dragDialPos) {return;}
-		showNavHomeDragMsg("can't drop here (" + (dial.position.row+1) + "X" + (dial.position.col+1) + ")", "#FF3232");
+		showNavHomeDragMsg("can't drop here (" + (dial.position.row + 1) + "X" + (dial.position.col + 1) + ")", "#FF3232");
 	});
 	item.appendChild(nameBtn);
 	item.appendChild(menuBtn);
@@ -162,7 +169,7 @@ const dialBttn = (dial) => {
 			evt.dataTransfer.setData("text/plain", JSON.stringify(dragDialPos));
 			evt.dataTransfer.effectAllowed = "move";
 		});
-		item.addEventListener("dragend", () => {dragDialPos = null;	updNavHome(getActTab());});
+		item.addEventListener("dragend", () => {dragDialPos = null;updNavHome(getActTab());});
 	}
 	return item;
 };
