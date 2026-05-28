@@ -19,7 +19,7 @@ https://jaydevdo.github.io/JSD-AI/
 Development snapshot.
 
 ```text
-version: 1.0.7
+version: 1.0.8
 storage: localStorage
 layout: vertical / horizontal
 dialogs: JavaScript-built, grouped in dialogs.js
@@ -48,6 +48,7 @@ Core behavior:
 - Allows archived dials to be restored or deleted forever
 - Supports JSON import/export
 - Supports hiding add-dial buttons while keeping empty slots clickable
+- Search for dials.
 ```
 
 ## Data model
@@ -264,22 +265,6 @@ default-JSD.json
 LICENSE
 README.md
 ```
-
-## Roadmap
-
-Planned for 1.0.8:
-
-```text
-- navHome search
-```
-
-Experimental branch:
-
-```text
-exp-slider-puzzle
-```
-
-The slider-puzzle branch is for exploring a fixed-grid mode where one slot stays empty and dials slide into neighboring empty positions.
 
 ## License
 
