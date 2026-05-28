@@ -3,7 +3,7 @@
 <head>
 	<meta charset = "UTF-8">
 	<meta name = "viewport" content = "width=device-width, initial-scale=1.0">
-	<title>JSD-AI</title>
+	<title>JSD-AI 1.0.8</title>
 	<link rel = "stylesheet" href = "JSD.css">
 	<link rel = "stylesheet" href = "dialogs.css">
 	<script defer src = "fctr_LclStrg.js"></script>
@@ -24,6 +24,12 @@
 			<button id = "addTabBtn" type = "button">+Tab</button>
 			<button id = "settingsBtn" type = "button">Settings</button>
 		</div>
+	</div>
+
+	<div id = "searchBox" style = "position: absolute; left: 10px; top: 10px; z-index: 2;">
+		<span id = "searchIcon" title = "Search dials" >🔍</span>
+		<span id = "searchClose" title = "Close search" style = "color: #FF0000;" hidden>X</span>
+		<input id = "searchText" type = "text" autocomplete = "off" spellcheck = "false" style = "width: 100px;" hidden>
 	</div>
 </body>
 </html>

@@ -267,3 +267,7 @@ html, body {
 	text-align: center;
 	padding-top: 20%;
 }
+.searchHiddenCell {
+	visibility: hidden;
+	pointer-events: none;
+}
