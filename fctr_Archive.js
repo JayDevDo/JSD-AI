@@ -1,12 +1,10 @@
 /*
 	fctr_Archive.js
-	Version = 20260526
+	Version = 20260601 
 */
 "use strict";
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const archList = () => JSDStore.tabDials(archTabId);
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-const archSize = () => archList().length;
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const archDial = (dial) => {
 	const data = JSDStore.getData();
@@ -62,12 +60,6 @@ const restoreFromArchPos = (pos) => {
 	return res;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-const restoreFromArch = () => {
-	const archived = archList();
-	if (!archived.length) {return { ok: false, mssgs: ["Archive is empty"] };}
-	return restoreFromArchPos(archived[0].position);
-};
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const deleteFromArchPos = (pos) => {
 	const data = JSDStore.getData();
 	const dial = JSDStore.dialAt(pos);
@@ -79,10 +71,8 @@ const deleteFromArchPos = (pos) => {
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const JSDArch = {
 	archList: archList,
-	archSize: archSize,
 	archDial: archDial,
 	delToArch: delToArch,
-	restoreFromArch: restoreFromArch,
 	restoreFromArchPos: restoreFromArchPos,
 	deleteFromArchPos: deleteFromArchPos
 };

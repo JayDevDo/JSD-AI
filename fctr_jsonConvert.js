@@ -1,6 +1,6 @@
 /*
 	fctr_jsonConvert.js
-	Version = 20260526
+	Version = 20260601 
 */
 "use strict";
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -120,14 +120,7 @@ const convertOldJsdDataToImportJson = (oldData) => {
 	};
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-const convertOldJsdString = (oldJsonString) => convertOldJsdData(JSON.parse(oldJsonString));
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-const convertOldJsdStringToImportJson = (oldJsonString) => convertOldJsdDataToImportJson(JSON.parse(oldJsonString));
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const JSDOldJson = {
 	isOldJson: isOldJson,
-	convertData: convertOldJsdData,
-	convertString: convertOldJsdString,
-	convertDataToImportJson: convertOldJsdDataToImportJson,
-	convertStringToImportJson: convertOldJsdStringToImportJson
+	convertDataToImportJson: convertOldJsdDataToImportJson
 };

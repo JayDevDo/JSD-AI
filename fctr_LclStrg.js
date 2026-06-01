@@ -1,6 +1,6 @@
 /*
 	fctr_LclStrg.js
-	Version = 20260528 19h00
+	Version = 20260601 
 */
 "use strict";
 const lsKey = "JSD.appData";

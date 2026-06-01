@@ -1,12 +1,10 @@
 /*
 	fctr_Positioning.js
-	Version = 20260526
+	Version = 20260601 
 */
 "use strict";
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const samePos = (posA, posB) => posA.tabId === posB.tabId && posA.row === posB.row && posA.col === posB.col;
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-const sameCell = (posA, posB) => posA.row === posB.row && posA.col === posB.col;
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const skipPosMatch = (dialPos, skipPos) => {
 	if (!skipPos) {return false;}
@@ -33,18 +31,6 @@ const getPins = () => {
 	return pins;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-const freeSlots = (tabId, skipPos = null, rows = null, cols = null, pinPos = null) => {
-	const tab = JSDStore.tabById(tabId);
-	const slots = [];
-	for (let row = 0; row < (rows || tab.rows); row++) {
-		for (let col = 0; col < (cols || tab.cols); col++) {
-			const pos = JSDStore.makePos(tabId, row, col);
-			if (!posTaken(pos, skipPos, pinPos)) {slots.push(pos);}
-		}
-	}
-	return slots;
-};
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const posDist = (posA, posB) => Math.abs(posA.row - posB.row) + Math.abs(posA.col - posB.col);
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const sortByDist = (slots, fromPos) => {
@@ -64,34 +50,12 @@ const freePos = (tabId, skipPos = null, rows = null, cols = null, pinPos = null)
 	return slots.length ? slots[0] : null;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-const freePosClosest = (tabId, fromPos, skipPos = null, rows = null, cols = null, pinPos = null) => {
-	const slots = sortByDist(freeSlots(tabId, skipPos, rows, cols, pinPos), fromPos);
-	return slots.length ? slots[0] : null;
-};
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-const sharedGrid = () => {
-	let rows = null;
-	let cols = null;
-	for (const tab of JSDStore.usrTabs()) {
-		rows = rows === null ? tab.rows : Math.min(rows, tab.rows);
-		cols = cols === null ? tab.cols : Math.min(cols, tab.cols);
-	}
-	return { rows: rows || 0, cols: cols || 0 };
-};
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const pinCellUsed = (pos, oldPos = null) => {
 	for (const dial of JSDStore.getDials()) {
 		if (oldPos && samePos(dial.position, oldPos)) {continue;}
 		if (dial.pinned && sameCell(dial.position, pos)) {return true;}
 	}
 	return false;
-};
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-const pinTargetFor = (fromPos, oldPos = null) => {
-	const grid = sharedGrid();
-	if (fromPos.tabId === archTabId || fromPos.row >= grid.rows || fromPos.col >= grid.cols) {return null;}
-	if (pinCellUsed(fromPos, oldPos)) {return null;}
-	return fromPos;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const pinMovePlan = (dial, oldPos = null) => {
@@ -148,20 +112,57 @@ const moveOut = (tab, rows, cols) => {
 	}
 	return res;
 };
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+const freeSlots = (tabId, skipPos = null, rows = null, cols = null, pinPos = null) => {
+	const tab = JSDStore.tabById(tabId);
+	const slots = [];
+	for (let row = 0; row < (rows || tab.rows); row++) {
+		for (let col = 0; col < (cols || tab.cols); col++) {
+			const pos = JSDStore.makePos(tabId, row, col);
+			if (!posTaken(pos, skipPos, pinPos)) {slots.push(pos);}
+		}
+	}
+	return slots;
+};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+const sameCell = (posA, posB) => posA.row === posB.row && posA.col === posB.col;
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+const freePosClosest = (tabId, fromPos, skipPos = null, rows = null, cols = null, pinPos = null) => {
+	const slots = sortByDist(freeSlots(tabId, skipPos, rows, cols, pinPos), fromPos);
+	return slots.length ? slots[0] : null;
+};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+const sharedGrid = () => {
+	let rows = null;
+	let cols = null;
+	for (const tab of JSDStore.usrTabs()) {
+		rows = rows === null ? tab.rows : Math.min(rows, tab.rows);
+		cols = cols === null ? tab.cols : Math.min(cols, tab.cols);
+	}
+	return { rows: rows || 0, cols: cols || 0 };
+};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+const pinTargetFor = (fromPos, oldPos = null) => {
+	const grid = sharedGrid();
+	if (fromPos.tabId === archTabId || fromPos.row >= grid.rows || fromPos.col >= grid.cols) {return null;}
+	if (pinCellUsed(fromPos, oldPos)) {return null;}
+	return fromPos;
+};
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 const JSDPos = {
-	samePos: samePos,
-	sameCell: sameCell,
-	posTaken: posTaken,
-	getPins: getPins,
-	freeSlots: freeSlots,
-	tabHasFree: tabHasFree,
 	freePos: freePos,
-	freePosClosest: freePosClosest,
-	sharedGrid: sharedGrid,
-	pinTargetFor: pinTargetFor,
+	getPins: getPins,
+	moveForPin: moveForPin,
+	moveOut: moveOut,
 	pinMovePlan: pinMovePlan,
 	pinOK: pinOK,
-	moveForPin: moveForPin,
-	moveOut: moveOut
+	posTaken: posTaken,
+	samePos: samePos,
+	tabHasFree: tabHasFree,
+	sameCell: sameCell,
+	freeSlots: freeSlots,
+	freePosClosest: freePosClosest,
+	sharedGrid: sharedGrid,
+	pinTargetFor: pinTargetFor
 };

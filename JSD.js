@@ -1,6 +1,6 @@
 /*
 	JSD.js
-	Version = 20260528 19h00
+	Version = 20260601 
 */
 "use strict";
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -76,8 +76,9 @@ const buildTabs = () => {
 		const tab = tabs[idx];
 		const tabElm = makeElement("div", { className: "tab" });
 		const menuBtn = makeElement("button", { className: "tabMenu", textContent: "🛠" });
-		const nameBtn = makeElement("button", { className: "tabName", textContent: tab.tabId });
 		const dialsFound = searchRes ? searchRes.tabs[idx].dialsFound : 1;
+		const nameText = searchRes ? tab.tabId + " (" + dialsFound + ")" : tab.tabId;
+		const nameBtn = makeElement("button", { className: "tabName", textContent: nameText });
 		tabElm.style.background = dialsFound ? tab.bgColor : "#303030";
 		tabElm.style.color = dialsFound ? tab.txtColor : "#777777";
 		if (tab.tabId === JSDStore.getUsr().activeTabId) {tabElm.classList.add("active");}
@@ -244,7 +245,17 @@ const showNavHomeDragMsg = (text, color) => {
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const updAddBtn = () => {getElm("addTabBtn").hidden = JSDStore.usrTabs().length >= JSDStore.getSys().maxTabs - 1;};
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const updNavHome = (tab) => {getElm("navHome").textContent = tab.tabId;};
+const updNavHome = (tab) => {
+	const navHome = getElm("navHome");
+	navHome.style.color = "";
+	navHome.style.borderColor = "";
+	if (dialSearchMode) {
+		const searchRes = JSDStore.findDials(dialSearchText.toLowerCase());
+		navHome.textContent = searchRes.total + " matches";
+		return;
+	}
+	navHome.textContent = tab.tabId;
+};
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const wireApp = () => {
 	getElm("navHome").addEventListener("click", openHome);

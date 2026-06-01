@@ -1,6 +1,6 @@
 /*
 	dialogs.css
-	Version = 20260527
+	Version = 20260601 
 */
 #tabDlg, #dialDlg, #jsonDlg, #settingsDlg {
 	position: fixed;
@@ -88,7 +88,6 @@
 #dialDlg button,
 #jsonDlg button,
 #settingsDlg button {
-	cursor: pointer;
 	white-space: nowrap;
 }
 #tabDlg input,
