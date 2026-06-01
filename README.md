@@ -172,3 +172,64 @@ README.md
 ## License
 
 MIT License.
+
+
+## Version 1.0.10
+JSD.js
+	- Added vertical tab occupancy percentage using JSDPos.freeSlots(...)
+	- Added tab color mode class handling:
+		tabColorsNormal
+		tabColorsGradient
+	- Gradient only affects vertical view
+	- Existing data without tabColorMode uses runtime fallback
+
+JSD.css
+	- Added Normal / Gradient tab color behavior
+	- Gradient shows occupied slots from the right side
+	- Empty tab capacity shown as grey
+	- Removed overflow: hidden style behavior
+
+dialogs.js
+	- Added Tab colors setting
+	- Internal values:
+		Normal
+		Gradient
+	- Dropdown display:
+		Normal
+		Free slots gradient
+	- Removed Theme setting from UI
+	- JSON button moved onto the 'Add Dial' row
+	- Settings dialog user block is now one row shorter
+	- Resize move/archive warning confirmation retained
+	- Shared confirmPlan retained
+
+dialogs.css
+	- Cleaned settings layout
+	- Added proper row classes:
+		viewTabColorsRow
+		addDialJsonRow
+	- Widened settings dialog
+	- Widened tab color dropdown
+	- Removed overflow: hidden behavior
+
+default-JSD.json
+	- Added:
+		userSettings.tabColorMode = "Normal"
+
+fctr_Positioning.js
+	- Added shared move-plan object
+	- Added moveOutPlan()
+	- Resize preview supports move/archive/drop messages
+	- Preview archive wording:
+		LABEL -> Archive
+
+fctr_LclStrg.js
+	- replDials now returns message array directly
+	- saveDial still returns { ok, mssgs }
+	- saveTab resize path still performs actual move/archive after confirmation
+
+fctr_Json.js
+	- Updated dials-only import caller for replDials message-array return
+
+dialogs.css
+	- Dialog message areas render multiline messages correctly
