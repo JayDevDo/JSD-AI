@@ -1,6 +1,6 @@
 /*
 	fctr_LclStrg.js
-	Version = 20260601 
+	Version = 20260601 16h05
 */
 "use strict";
 const lsKey = "JSD.appData";
@@ -93,11 +93,7 @@ const tabIdx = (tabId) => {
 	return -1;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const tabById = (tabId) => {
-	const idx = tabIdx(tabId);
-	if (idx === -1) {return null;}
-	return appData.allTabs[idx];
-};
+const tabById = (tabId) => {const idx = tabIdx(tabId);if (idx === -1) {return null;}return appData.allTabs[idx];};
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const dialAt = (pos) => {
 	for (const dial of appData.allDials) {if (JSDPos.samePos(dial.position, pos)) {return dial;}}
@@ -228,44 +224,29 @@ const delTab = (tabId) => {
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const setActTab = (tabId) => {appData.userSettings.activeTabId = tabId;	return saveData();};
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const setLastClk = (pos) => {
-	const dial = dialAt(pos);
-	if (dial) {dial.lastClicked = new Date().toISOString();}
-	return saveData();
-};
+const setLastClk = (pos) => {const dial = dialAt(pos);if (dial) {dial.lastClicked = new Date().toISOString();}return saveData();};
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const makePos = (tabId, row, col) => {return { tabId: tabId, row: row, col: col };};
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const exportJson = (pretty = true) => {
-	if (pretty) {return JSON.stringify(appData, null, "\t");}
-	return JSON.stringify(appData);
-};
+const exportJson = (pretty = true) => {if (pretty) {return JSON.stringify(appData, null, "\t");}return JSON.stringify(appData);};
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const replDials = (dials) => {
 	const oldDials = appData.allDials.length;
-	const res = { ok: true, mssgs: [] };
+	let mssgs = [];
 	appData.allDials = [];
-	for (const dial of dials.filter((item) => !item.pinned)) {
-		const chk = saveDial(dial);
-		res.mssgs = res.mssgs.concat(chk.mssgs);
-	}
-	for (const dial of dials.filter((item) => item.pinned)) {
-		const chk = saveDial(dial);
-		res.mssgs = res.mssgs.concat(chk.mssgs);
-	}
+	for (const dial of dials.filter((item) => !item.pinned)) {const chk = saveDial(dial);mssgs = mssgs.concat(chk.mssgs);}
+	for (const dial of dials.filter((item) => item.pinned)) {const chk = saveDial(dial);mssgs = mssgs.concat(chk.mssgs);}
 	saveData();
-	res.mssgs.unshift("dials replaced: " + oldDials + " -> " + appData.allDials.length);
-	return res;
+	mssgs.unshift("dials replaced: " + oldDials + " -> " + appData.allDials.length);
+	return mssgs;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const replTabsDials = (tabs, dials) => {
 	const oldTabs = usrTabs().length;
 	const res = { ok: true, mssgs: [] };
 	appData.allTabs = cloneData(tabs);
-	res.mssgs = res.mssgs.concat(replDials(dials).mssgs);
-	if (!tabById(appData.userSettings.activeTabId)) {
-		appData.userSettings.activeTabId = tabsByOrd().length ? tabsByOrd()[0].tabId : archTabId;
-	}
+	res.mssgs = res.mssgs.concat(replDials(dials));
+	if (!tabById(appData.userSettings.activeTabId)) {appData.userSettings.activeTabId = tabsByOrd().length ? tabsByOrd()[0].tabId : archTabId;}
 	saveData();
 	res.mssgs.unshift("user tabs replaced: " + oldTabs + " -> " + usrTabs().length);
 	return res;
@@ -280,34 +261,34 @@ const replUsr = (data) => {
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const JSDStore = {
-	initData: initData,
 	commit: saveData,
-	getData: getData,
-	getSys: getSys,
-	getUsr: getUsr,
-	getTabs: getTabs,
-	getDials: getDials,
-	saveUsr: saveUsr,
-	saveSettings: saveSettings,
-	tabById: tabById,
-	dialAt: dialAt,
-	tabDials: tabDials,
-	usrTabs: usrTabs,
-	usrDials: usrDials,
-	findDials: findDials,
-	getPinGridSize: getPinGridSize,
-	tabsByOrd: tabsByOrd,
-	saveTab: saveTab,
-	saveDial: saveDial,
-	moveDial: moveDial,
 	delTab: delTab,
-	setActTab: setActTab,
-	setLastClk: setLastClk,
-	makePos: makePos,
-	newTab: newTab,
-	newDial: newDial,
+	dialAt: dialAt,
 	exportJson: exportJson,
+	findDials: findDials,
+	getData: getData,
+	getDials: getDials,
+	getPinGridSize: getPinGridSize,
+	getSys: getSys,
+	getTabs: getTabs,
+	getUsr: getUsr,
+	initData: initData,
+	makePos: makePos,
+	moveDial: moveDial,
+	newDial: newDial,
+	newTab: newTab,
 	replDials: replDials,
 	replTabsDials: replTabsDials,
-	replUsr: replUsr
+	replUsr: replUsr,
+	saveDial: saveDial,
+	saveSettings: saveSettings,
+	saveTab: saveTab,
+	saveUsr: saveUsr,
+	setActTab: setActTab,
+	setLastClk: setLastClk,
+	tabById: tabById,
+	tabDials: tabDials,
+	tabsByOrd: tabsByOrd,
+	usrDials: usrDials,
+	usrTabs: usrTabs
 };

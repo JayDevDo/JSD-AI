@@ -28,7 +28,8 @@
 		"theme": "dark",
 		"view": "vView",
 		"showAddDials": true,
-		"activeTabId": "HOME"
+		"activeTabId": "HOME",
+		"tabColorMode": "Normal"
 	},
 	"allTabs": [
 		{

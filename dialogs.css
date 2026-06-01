@@ -46,7 +46,7 @@
 }
 #settingsDlg > table {
 	border-spacing: 18px 12px;
-	width: min(920px, 94vw);
+	width: min(1120px, 98vw);
 }
 #tabDlg caption,
 #dialDlg caption,
@@ -150,7 +150,7 @@
 	white-space: pre;
 	overflow: auto;
 }
-#jsonMssg, #dialPlanMssg {
+#jsonMssg, #dialPlanMssg, #tabMssg, #settingsMssg {
 	max-height: 22vh;
 	overflow: auto;
 	white-space: pre-wrap;
@@ -161,8 +161,11 @@
 #dialPlanMssg[hidden] {
 	display: none;
 }
-#settingsDlg td {
-	width: 50%;
+#settingsDlg td:first-child {
+	width: 58%;
+}
+#settingsDlg td:last-child {
+	width: 42%;
 }
 #settingsDlg input[type="number"],#settingsDlg select {
 	width: 7ch;
@@ -173,13 +176,17 @@
 #settingsDlg #setShowAddDials {
 	width: 9ch;
 }
+#setTabColorMode {
+	width: max-content;
+	min-width: 24ch;
+}
 .settingsBlock,.rdOnlyBlock,#settingsDlg td > div {
 	display: grid;
 	grid-auto-rows: min-content;
 	gap: 4px;
 	align-content: start;
 	min-width: 0;
-	overflow: hidden;
+	overflow: visible;
 }
 .settingsBlock h3,.rdOnlyBlock h3,#settingsDlg td > div > h3 {
 	margin: 0 0 4px 0;
@@ -206,6 +213,11 @@
 	align-items: center;
 	min-width: 7ch;
 	white-space: nowrap;
+}
+.usrSettingsBlock .viewTabColorsRow,
+.usrSettingsBlock .addDialThemeRow {
+	grid-template-columns: max-content max-content max-content max-content;
+	width: max-content;
 }
 .usrSettingsBlock .contrastRow {
 	grid-template-columns: max-content 7ch max-content 7ch max-content;
@@ -259,8 +271,7 @@
 	gap: 2px;
 	min-width: 0;
 	max-height: 174px;
-	overflow-y: auto;
-	overflow-x: hidden;
+	overflow: auto;
 	border: 1px solid #444444;
 	background: #111111;
 }
@@ -273,9 +284,6 @@
 	padding: 2px 4px;
 }
 .archiveOrder,.archiveLabel {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 	min-width: 0;
 }
 .archiveOrder {
@@ -283,6 +291,8 @@
 }
 .archiveLabel {
 	color: #ffffff;
+	white-space: normal;
+	overflow-wrap: anywhere;
 }
 #settingsDlg .dialogActions {
 	display: grid;

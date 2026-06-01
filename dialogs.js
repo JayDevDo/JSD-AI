@@ -34,13 +34,27 @@ const makeDialogActions = (...bttns) => {
 	return actions;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const setDialogMssg = (elm, mssgs, fallback = "Ready.") => {
+const setDialogMssg = (elm, mssgs, fallback = "") => {
 	elm.textContent = mssgs.length ? mssgs.join("\n") : fallback;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const setInputInvalid = (input, invalid) => {
 	if (invalid) {input.classList.add("invalidInput");}
 	else {input.classList.remove("invalidInput");}
+};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+const confirmPlan = (plan, confirmed, setConfirmed, setMssg, applyBtn, title, confirmText) => {
+	if (!plan.ok) {
+		setMssg(plan.mssgs);
+		return false;
+	}
+	if (plan.mssgs.length && !confirmed()) {
+		setConfirmed(true);
+		setMssg([title].concat(plan.mssgs));
+		applyBtn.textContent = confirmText;
+		return false;
+	}
+	return true;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Text validation helpers
@@ -144,6 +158,8 @@ const openTabDialog = (tab = null) => {
 	const editMode = Boolean(tab);
 	const oldId = editMode ? tab.tabId : null;
 	const workTab = tab ? cloneData(tab) : JSDStore.newTab();
+	let resizePlanConfirmed = false;
+
 	const frm = makeDialogFrame("tabDlg", editMode ? "Edit tab" : "Add tab");
 
 	const tabInput = makeTextInput("tabIdInput", workTab.tabId.toUpperCase(), sys.minLabelLen, sys.maxTabLabelLen);
@@ -157,19 +173,44 @@ const openTabDialog = (tab = null) => {
 
 	const tabFormMssgs = () => tabNameMssgs(tabInput.value, sys, oldId);
 	const canSaveTab = () => tabFormMssgs().length === 0;
+	const setTabMssg = (mssgs) => setDialogMssg(tabMssg, mssgs);
 
 	const syncTabForm = () => {
 		const mssgs = tabFormMssgs();
 		applyBtn.hidden = !canSaveTab();
 		setInputInvalid(tabInput, Boolean(mssgs.length));
-		setDialogMssg(tabMssg, mssgs);
+		if (mssgs.length) {setTabMssg(mssgs);}
+		else if (!resizePlanConfirmed) {setTabMssg([]);}
+	};
+
+	const resetResizePlan = () => {
+		resizePlanConfirmed = false;
+		applyBtn.textContent = editMode ? "Apply" : "Add";
+		syncTabForm();
 	};
 
 	const blockedTabInput = (mssg) => {
+		resizePlanConfirmed = false;
+		applyBtn.textContent = editMode ? "Apply" : "Add";
 		const mssgs = tabFormMssgs();
 		applyBtn.hidden = !canSaveTab();
 		setInputInvalid(tabInput, Boolean(mssgs.length));
 		setDialogMssg(tabMssg, [mssg].concat(mssgs));
+	};
+
+	const handleResizePlan = () => {
+		if (!editMode) {return true;}
+		if (Number(rowsSelect.value) >= tab.rows && Number(colsSelect.value) >= tab.cols) {return true;}
+		const plan = JSDPos.moveOutPlan(JSDStore.tabById(oldId), Number(rowsSelect.value), Number(colsSelect.value));
+		return confirmPlan(
+			plan,
+			() => resizePlanConfirmed,
+			(value) => {resizePlanConfirmed = value;},
+			setTabMssg,
+			applyBtn,
+			"Resizing will change dials:",
+			"Confirm resize"
+		);
 	};
 
 	const handleSave = () => {
@@ -180,6 +221,9 @@ const openTabDialog = (tab = null) => {
 		workTab.order = Number(ordSelect.value);
 		workTab.bgColor = bgInput.value;
 		workTab.txtColor = txtInput.value;
+
+		if (!handleResizePlan()) {return;}
+
 		const res = JSDStore.saveTab(workTab, oldId);
 		if (res.ok) {renderApp(appData);frm.dialog.remove();}
 		showMssgs(res.mssgs);
@@ -204,7 +248,12 @@ const openTabDialog = (tab = null) => {
 	tabInput.addEventListener("paste", (evt) => {evt.preventDefault();blockedTabInput("Tab name does not accept pasting text");});
 	tabInput.addEventListener("drop", (evt) => {evt.preventDefault();blockedTabInput("Tab name does not accept dropping text");});
 	tabInput.addEventListener("beforeinput", (evt) => blockTextBeforeInput(evt, tabInput, sys.maxTabLabelLen, blockedTabInput, "Tab name"));
-	tabInput.addEventListener("input", () => {forceInputCaps(tabInput);syncTabForm();});
+	tabInput.addEventListener("input", () => {forceInputCaps(tabInput);resetResizePlan();});
+	rowsSelect.addEventListener("change", resetResizePlan);
+	colsSelect.addEventListener("change", resetResizePlan);
+	ordSelect.addEventListener("change", resetResizePlan);
+	bgInput.addEventListener("input", resetResizePlan);
+	txtInput.addEventListener("input", resetResizePlan);
 	delCheck.addEventListener("change", () => {delBtn.hidden = !delCheck.checked;});
 	frm.dialog.addEventListener("keydown", (evt) => {if (evt.key === "Escape") {frm.dialog.remove();}});
 
@@ -396,14 +445,15 @@ const openDialDialog = (pos, dial = null) => {
 	const handlePinPlan = () => {
 		if (!workDial.pinned || (editMode && dial.pinned)) {return true;}
 		const plan = JSDPos.pinMovePlan(workDial, oldPos);
-		if (!plan.ok) {setDialMssg(plan.mssgs);return false;}
-		if (plan.moves.length && !pinPlanConfirmed) {
-			pinPlanConfirmed = true;
-			setDialMssg(["Pinning will move:"].concat(plan.mssgs));
-			applyBtn.textContent = "Confirm pin";
-			return false;
-		}
-		return true;
+		return confirmPlan(
+			plan,
+			() => pinPlanConfirmed,
+			(value) => {pinPlanConfirmed = value;},
+			setDialMssg,
+			applyBtn,
+			"Pinning will move:",
+			"Confirm pin"
+		);
 	};
 
 	const handleSave = () => {
@@ -723,29 +773,29 @@ const openSettingsDialog = () => {
 		return block;
 	};
 
+
 	const buildUserSttsBlock = () => {
 		const sys = JSDStore.getSys();
 		const usr = JSDStore.getUsr();
 		const viewLabels = { vView: "tabs left", hView: "tabs on top"};
 		const nextView = usr.view === "vView" ? "hView" : "vView";
+		const tabColorMode = usr.tabColorMode || "Gradient";
 
 		const block = Object.assign(document.createElement("div"), { className: "settingsBlock usrSettingsBlock" });
 		const title = Object.assign(document.createElement("h3"), { textContent: "User settings" });
 
-		const viewRow = Object.assign(document.createElement("div"), { className: "settingsRow" });
+		const viewTabColorsRow = Object.assign(document.createElement("div"), { className: "settingsRow viewTabColorsRow" });
 		const lblView = Object.assign(document.createElement("span"), { className: "settingsLabel", textContent: "View:" });
 		const bttnView = makeButton(viewLabels[nextView], () => {
 			setView(nextView);
 			renderApp();
 			document.getElementById("settingsDlg").remove();
 		});
+		const lblTabColors = Object.assign(document.createElement("span"), { className: "settingsLabel", textContent: "Tab colors:" });
+		const valTabColors = makeSelect("setTabColorMode", ["Normal", "Gradient"], tabColorMode, "settingsValue");
 		bttnView.className = "bttnViewToggle";
-		viewRow.append(lblView, bttnView);
-
-		const themeRow = Object.assign(document.createElement("div"), { className: "settingsRow" });
-		const lblTheme = Object.assign(document.createElement("span"), { className: "settingsLabel", textContent: "Theme:" });
-		const valTheme = makeSelect("setTheme", sys.themeOptions, usr.theme, "settingsValue");
-		themeRow.append(lblTheme, valTheme);
+		valTabColors.options[1].textContent = "Free slots gradient";
+		viewTabColorsRow.append(lblView, bttnView, lblTabColors, valTabColors);
 
 		const contrastRow = Object.assign(document.createElement("div"), { className: "settingsRow contrastRow" });
 		const lblContrast = Object.assign(document.createElement("span"), { className: "settingsLabel", textContent: "Contrast:" });
@@ -755,12 +805,14 @@ const openSettingsDialog = () => {
 		const sysMaxCntrast = Object.assign(document.createElement("span"), { className: "settingsLabel", textContent: sys.contrastLimits[1].toString() });
 		contrastRow.append(lblContrast, minContrast, sysMinCntrast, maxContrast, sysMaxCntrast);
 
-		const addDialsRow = Object.assign(document.createElement("div"), { className: "settingsRow" });
-		const lblAddDials = Object.assign(document.createElement("span"), { className: "settingsLabel", textContent: "Show add dials:" });
+		const addDialThemeRow = Object.assign(document.createElement("div"), { className: "settingsRow addDialThemeRow" });
+		const lblAddDials = Object.assign(document.createElement("span"), { className: "settingsLabel", textContent: "'Add Dial':" });
 		const valAddDials = makeSelect("setShowAddDials", ["true", "false"], usr.showAddDials, "settingsValue");
-		valAddDials.options[0].textContent = "visible";
-		valAddDials.options[1].textContent = "hidden";
-		addDialsRow.append(lblAddDials, valAddDials);
+		const lblTheme = Object.assign(document.createElement("span"), { className: "settingsLabel", textContent: "Theme:" });
+		const valTheme = makeSelect("setTheme", sys.themeOptions, usr.theme, "settingsValue");
+		valAddDials.options[0].textContent = "Show";
+		valAddDials.options[1].textContent = "Hidden";
+		addDialThemeRow.append(lblAddDials, valAddDials, lblTheme, valTheme);
 
 		const jsonRow = Object.assign(document.createElement("div"), { className: "settingsRow" });
 		const lblJson = Object.assign(document.createElement("span"), { className: "settingsLabel", textContent: "JSON:" });
@@ -770,7 +822,7 @@ const openSettingsDialog = () => {
 		}, "jsonImportExportBtn");
 		jsonRow.append(lblJson, jsonBtn);
 
-		block.append(title, viewRow, themeRow, contrastRow, addDialsRow, jsonRow);
+		block.append(title, viewTabColorsRow, contrastRow, addDialThemeRow, jsonRow);
 		return block;
 	};
 
@@ -789,6 +841,7 @@ const openSettingsDialog = () => {
 		const userContrastMaxInput = document.getElementById("setUserContrastMax");
 		const themeInput = document.getElementById("setTheme");
 		const showAddDialsInput = document.getElementById("setShowAddDials");
+		const tabColorModeInput = document.getElementById("setTabColorMode");
 		const msgs = [];
 
 		if (Number(minRowsInput.value) > Number(maxRowsInput.value)) {msgs.push("minRows cannot be greater than maxRows");}
@@ -809,7 +862,8 @@ const openSettingsDialog = () => {
 		const newUsr = {
 			contrastLevel: [Number(userContrastMinInput.value), Number(userContrastMaxInput.value)],
 			theme: themeInput.value,
-			showAddDials: showAddDialsInput.value === "true"
+			showAddDials: showAddDialsInput.value === "true",
+			tabColorMode: tabColorModeInput.value
 		};
 
 		JSDStore.saveSettings(newSys, newUsr);

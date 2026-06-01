@@ -79,7 +79,10 @@ const buildTabs = () => {
 		const dialsFound = searchRes ? searchRes.tabs[idx].dialsFound : 1;
 		const nameText = searchRes ? tab.tabId + " (" + dialsFound + ")" : tab.tabId;
 		const nameBtn = makeElement("button", { className: "tabName", textContent: nameText });
-		tabElm.style.background = dialsFound ? tab.bgColor : "#303030";
+		const usedPct = tab.rows * tab.cols ? ((tab.rows * tab.cols - JSDPos.freeSlots(tab.tabId).length) / (tab.rows * tab.cols)) * 100 : 100;
+		tabElm.style.setProperty("--tab-used", usedPct.toFixed(2) + "%");
+		tabElm.style.setProperty("--tab-fill-color", dialsFound ? tab.bgColor : "#303030");
+		tabElm.style.setProperty("--tab-empty-color", "#404040");
 		tabElm.style.color = dialsFound ? tab.txtColor : "#777777";
 		if (tab.tabId === JSDStore.getUsr().activeTabId) {tabElm.classList.add("active");}
 		menuBtn.addEventListener("click", () => openTabDialog(tab));
@@ -225,7 +228,7 @@ const pinAt = (row, col) => {
 	return null;
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const renderApp = () => {buildTabs();buildTabGrid();updAddBtn();};
+const renderApp = () => {updTabColorMode();buildTabs();buildTabGrid();updAddBtn();};
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const setView = (view) => {
 	getElm("app").classList.remove("vView", "hView");
@@ -255,6 +258,13 @@ const updNavHome = (tab) => {
 		return;
 	}
 	navHome.textContent = tab.tabId;
+};
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+const updTabColorMode = () => {
+	const app = getElm("app");
+	const mode = JSDStore.getUsr().tabColorMode || "Gradient";
+	app.classList.remove("tabColorsNormal", "tabColorsGradient");
+	app.classList.add(mode === "Gradient" ? "tabColorsGradient" : "tabColorsNormal");
 };
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const wireApp = () => {

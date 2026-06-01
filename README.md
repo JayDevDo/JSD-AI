@@ -17,7 +17,7 @@ https://jaydevdo.github.io/JSD-AI/
 Development snapshot.
 
 ```text
-version: 1.0.9 (2026-06-01 13h30)
+version: 1.0.10 (2026-06-01 21h30)
 storage: localStorage
 layout: vertical / horizontal
 dialogs: JavaScript-built
@@ -44,6 +44,7 @@ Core behavior:
 - Allows archived dials to be restored or deleted forever
 - Supports JSON import/export
 - Provides Dial search functionality
+- Shows free slots availability.
 ```
 
 ## Data model
