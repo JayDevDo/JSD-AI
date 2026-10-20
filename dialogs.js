@@ -1,11 +1,11 @@
 /*
 	dialogs.js
-	Version = 20260601 
+	Version = 20261020 18h00
 */
 "use strict";
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Dialog builders
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const makeDialogFrame = (dlgId, captionText) => {
 	const dialog = makeElement("div", { id: dlgId });
 	const table = document.createElement("table");
@@ -27,22 +27,22 @@ const makeDialogRow = (...cells) => {
 	}
 	return row;
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const makeDialogActions = (...bttns) => {
 	const actions = makeElement("div", { className: "dialogActions" });
 	for (const bttn of bttns) {actions.appendChild(bttn);}
 	return actions;
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const setDialogMssg = (elm, mssgs, fallback = "") => {
 	elm.textContent = mssgs.length ? mssgs.join("\n") : fallback;
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const setInputInvalid = (input, invalid) => {
 	if (invalid) {input.classList.add("invalidInput");}
 	else {input.classList.remove("invalidInput");}
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const confirmPlan = (plan, confirmed, setConfirmed, setMssg, applyBtn, title, confirmText) => {
 	if (!plan.ok) {
 		setMssg(plan.mssgs);
@@ -56,18 +56,18 @@ const confirmPlan = (plan, confirmed, setConfirmed, setMssg, applyBtn, title, co
 	}
 	return true;
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Text validation helpers
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const dialogTextCharsOK = (text) => {
 	for (const char of text.normalize("NFC")) {
 		if (/[\p{C}\p{Extended_Pictographic}\p{Emoji_Presentation}]/u.test(char)) {return false;}
 	}
 	return true;
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const dialogTextLen = (text) => Array.from(text.normalize("NFC")).length;
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const dialogLabelMssgs = (name, value, minLen, maxLen) => {
 	const normValue = value.normalize("NFC");
 	const valueLen = dialogTextLen(normValue);
@@ -77,7 +77,7 @@ const dialogLabelMssgs = (name, value, minLen, maxLen) => {
 	if (!dialogTextCharsOK(normValue)) {mssgs.push(name + " contains blocked characters");}
 	return mssgs;
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const blockTextBeforeInput = (evt, input, maxLen, blockedCb, fieldName) => {
 	if (evt.inputType && evt.inputType.startsWith("delete")) {return;}
 	if (evt.inputType === "historyUndo" || evt.inputType === "historyRedo") {return;}
@@ -105,7 +105,7 @@ const blockTextBeforeInput = (evt, input, maxLen, blockedCb, fieldName) => {
 		return;
 	}
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const forceInputCaps = (input) => {
 	const selStart = input.selectionStart;
 	const selEnd = input.selectionEnd;
@@ -115,11 +115,11 @@ const forceInputCaps = (input) => {
 		input.setSelectionRange(selStart, selEnd);
 	}
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Dial validation helpers
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const dialLabelMssgs = (label, sys) => dialogLabelMssgs("Dial label", label, sys.minLabelLen, sys.maxDialLabelLen);
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const dialUrlMssgs = (url) => {
 	const normUrl = url.normalize("NFC");
 	const mssgs = [];
@@ -136,9 +136,9 @@ const dialUrlMssgs = (url) => {
 	}
 	return mssgs;
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Tab validation helpers
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const tabNameMssgs = (tabId, sys, oldId = null) => {
 	const normTabId = tabId.normalize("NFC").toUpperCase();
 	const mssgs = dialogLabelMssgs("Tab name", normTabId, sys.minLabelLen, sys.maxTabLabelLen);
@@ -149,9 +149,9 @@ const tabNameMssgs = (tabId, sys, oldId = null) => {
 	}
 	return mssgs;
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Tab dialog
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const openTabDialog = (tab = null) => {
 	const appData = JSDStore.getData();
 	const sys = JSDStore.getSys();
@@ -277,9 +277,9 @@ const openTabDialog = (tab = null) => {
 	document.body.appendChild(frm.dialog);
 	tabInput.focus();
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Dial dialog
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const openDialDialog = (pos, dial = null) => {
 	const appData = JSDStore.getData();
 	const sys = JSDStore.getSys();
@@ -315,7 +315,7 @@ const openDialDialog = (pos, dial = null) => {
 	const dialTargetMssgs = () => {
 		const mssgs = [];
 		if (!tabSelect.value) {mssgs.push("No tab selected");}
-		if (tabSelect.value !== archTabId && (rowSelect.disabled || colSelect.disabled)) {mssgs.push("No free dial position selected");}
+		if (tabSelect.value !== archTabId && !lockPos && (rowSelect.disabled || colSelect.disabled)) {mssgs.push("No free dial position selected");}
 		return mssgs;
 	};
 
@@ -536,11 +536,11 @@ const openDialDialog = (pos, dial = null) => {
 	document.body.appendChild(frm.dialog);
 	labelInput.focus();
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // JSON dialog
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const jsonMsg = (elm, text) => {elm.textContent = text;console.info(text);};
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const openJsonDialog = () => {
 	let importParts = null;
 	let tdChk = null;
@@ -656,9 +656,9 @@ const openJsonDialog = () => {
 	document.body.appendChild(frm.dialog);
 	jsonText.focus();
 };
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Settings dialog
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const openSettingsDialog = () => {
 	const frm = makeDialogFrame("settingsDlg", "Settings");
 	const settingsMssg = makeElement("div", { id: "settingsMssg" });

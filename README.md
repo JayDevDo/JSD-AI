@@ -211,6 +211,7 @@ dialogs.css
 	- Widened settings dialog
 	- Widened tab color dropdown
 	- Removed overflow: hidden behavior
+	- Dialog message areas render multiline messages correctly
 
 default-JSD.json
 	- Added:
@@ -230,6 +231,3 @@ fctr_LclStrg.js
 
 fctr_Json.js
 	- Updated dials-only import caller for replDials message-array return
-
-dialogs.css
-	- Dialog message areas render multiline messages correctly
