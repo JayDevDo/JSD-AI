@@ -1,6 +1,6 @@
-# JSD-AI
+# Jay's Speed Dial 
 
-JSD-AI is a lightweight browser start-page / speed-dial app.
+Jay's Speed Dial (JSD) is a lightweight browser start-page / speed-dial app.
 
 The app scaffold is served from the project host: HTML, CSS, JavaScript, and the default JSON scaffold. 
 Your personal tabs, dials, settings, archive contents, and imported data live in your browser `localStorage`.
@@ -30,7 +30,7 @@ license: MIT
 
 ## What it does
 
-JSD-AI lets you maintain a browser-local dashboard of tabs and URL/path dials.
+Jay's Speed Dial lets you maintain a browser-local dashboard of tabs and URL/path dials.
 
 Core behavior:
 
